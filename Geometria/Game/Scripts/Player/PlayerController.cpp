@@ -22,15 +22,18 @@ void PlayerController::OnStart()
 
 void PlayerController::OnUpdate()
 {
-	if (Input::GetKeyDown(GLFW_KEY_SPACE))
+	if (Input::GetKey(GLFW_KEY_SPACE))
 	{
-		if(reverse)
-			rb->SetVelocity(Vector3(0, -15, 0));
-		else
-			rb->SetVelocity(Vector3(0, 15, 0));
+		if (PhysicsManager::Raycast(Vector3(GetTransform().position.x, GetTransform().position.y - 0.55f, GetTransform().position.z), Vector3::down(), 0.2))
+		{
+			if (reverse)
+				rb->SetVelocity(Vector3(0, -15, 0));
+			else
+				rb->SetVelocity(Vector3(0, 15, 0));
+		}
 	}
 
-	GetTransform().position += Vector3(7 * Graphics::DeltaTime(), 0, 0);
+	GetTransform().position += Vector3(5 * Graphics::DeltaTime(), 0, 0);
 
 	if (Input::GetKeyDown(GLFW_KEY_Q))
 	{
@@ -44,7 +47,13 @@ void PlayerController::OnUpdate()
 
 	if (camera != nullptr)
 	{
-		camera->GetTransform().position = Vector3(GetTransform().position.x, -5, GetTransform().position.z + 20);
+		camera->GetTransform().position = Vector3(GetTransform().position.x, GetTransform().position.y, GetTransform().position.z + 12);
+	}
+
+	if (GetTransform().position.y < -2)
+	{
+		rb->GetRigidbodyTransform().position = Vector3(GetTransform().position.x, 0.5, GetTransform().position.z);
+		std::cout << "Still in -2!" << std::endl;
 	}
 }
 
@@ -56,4 +65,14 @@ void PlayerController::OnInspector()
 void PlayerController::OnSave()
 {
 	SaveNewScript(PlayerController);
+}
+
+void PlayerController::OnCollisionEnter()
+{
+	isGrounded = true;
+}
+
+void PlayerController::OnCollisionExit()
+{
+	isGrounded = false;
 }

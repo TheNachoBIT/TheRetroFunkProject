@@ -10,14 +10,18 @@ void BoxCollider::OnStart()
 
 	if (GetScript<Rigidbody>() == nullptr)
 	{
-		if(boxStatic == nullptr)
+		if (boxStatic == nullptr)
+		{
 			boxStatic = PhysicsManager::CreateStaticBox(GetTransform().position, GetTransform().scale);
+			boxStatic->userData = this;
+		}
 	}
 	else
 	{
 		if (boxDynamic == nullptr)
 		{
 			boxDynamic = PhysicsManager::CreateDynamicBox(GetTransform().position, GetTransform().scale);
+			boxDynamic->userData = this;
 			std::cout << "Dynamic Box Set!" << std::endl;
 		}
 	}

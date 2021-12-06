@@ -8,5 +8,5 @@
 #include "../Graphics/Cores/Texture/Texture.h"
 #include "../Compiler/CompilationCore.h"
 #include "../CommonObjects/Empty.h"
-#include "../Web/Web.h"
+#include "../WebRequest/WebRequest.h"
 #undef CreateWindow

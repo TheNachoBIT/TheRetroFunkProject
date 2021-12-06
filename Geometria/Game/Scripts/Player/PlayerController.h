@@ -13,10 +13,15 @@ struct PlayerController : public ScriptBehaviour
 	void OnStart();
 	void OnUpdate();
 
+	void OnCollisionEnter();
+
+	void OnCollisionExit();
+
 	void OnInspector();
 
 	void OnSave();
 
+	bool isGrounded = false;
 	Camera* camera = nullptr;
 	bool reverse = false;
 	Rigidbody* rb = nullptr;

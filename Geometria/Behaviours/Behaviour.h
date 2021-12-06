@@ -164,6 +164,10 @@ struct ScriptBehaviour
 	}
 
 	bool _start = true;
+	bool _gameStart = false;
+	bool _editorStart = false;
+	bool _isCollisionEnter = false;
+	bool _isCollisionExit = false;
 	bool isEnabled = true;
 	bool isBeingDestroyed = false;
 
@@ -229,6 +233,44 @@ struct ScriptBehaviour
 	virtual void OnEditorUpdate() { return; }
 
 	virtual void OnInspector() { return; }
+
+	virtual void OnCollisionEnter() 
+	{
+		if (owner != nullptr && !_isCollisionEnter)
+		{
+			owner->OnCollisionEnter();
+		}
+		else
+		{
+			for (auto i : scripts)
+			{
+				i->_isCollisionEnter = true;
+				i->OnCollisionEnter();
+			}
+		}
+
+		_isCollisionEnter = false;
+		return; 
+	}
+
+	virtual void OnCollisionExit()
+	{
+		if (owner != nullptr && !_isCollisionExit)
+		{
+			owner->OnCollisionExit();
+		}
+		else
+		{
+			for (auto i : scripts)
+			{
+				i->_isCollisionExit = true;
+				i->OnCollisionExit();
+			}
+		}
+
+		_isCollisionExit = false;
+		return;
+	}
 
 	template <typename T>
 	T* AddScript()
