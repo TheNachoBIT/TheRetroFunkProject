@@ -4,6 +4,7 @@
 #include "../Physics/Rigidbody/Rigidbody.h"
 #include "Scripts/Player/PlayerController.h"
 #include "Scripts/GeometryDash/GDLevelLoader.h"
+#include "../Audio/AudioSource.h"
 
 Model* RFPPlayer = NULL,
 * RFPBaseGround = NULL;
@@ -25,6 +26,7 @@ void RFPLevelScene::Init()
 	RFPPlayer->GetScript<Rigidbody>()->freezePositionX = true;
 	RFPPlayer->AddScript<PlayerController>();
 	RFPPlayer->GetScript<PlayerController>()->camera = Graphics::MainCamera();
+	RFPPlayer->AddScript<AudioSource>();
 	std::cout << "Player Added!" << std::endl;
 	RendererCore::AddModel(*RFPPlayer);
 

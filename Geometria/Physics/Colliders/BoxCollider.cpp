@@ -32,6 +32,14 @@ void BoxCollider::OnInspector()
 	VisualAccess_Title(BoxCollider);
 }
 
+void BoxCollider::OnSave()
+{
+	SaveInclude(BoxCollider, "Physics/Colliders/BoxCollider.h");
+	SaveNewScript(BoxCollider);
+
+	SaveEnd();
+}
+
 void BoxCollider::OnUpdate()
 {
 

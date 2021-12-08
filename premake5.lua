@@ -43,6 +43,8 @@ project "Geometria"
 		"Libraries/include",
 		"Geometria/Behaviours",
 		"Geometria/MainHeader",
+		"Geometria/",
+		"Geometria/Game",
 		"%{IncludeDirectories.GLFW}",
 		"%{IncludeDirectories.GLEW}",
 		"%{IncludeDirectories.YAMLCPP}",
