@@ -11,5 +11,6 @@
 struct GDLevelLoader : public ScriptBehaviour
 {
 	void OnStart();
+	std::vector<Texture*> GDTextures;
 	void ReadLevel(std::string rawData);
 };
