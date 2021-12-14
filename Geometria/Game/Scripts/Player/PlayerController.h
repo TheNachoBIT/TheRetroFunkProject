@@ -29,6 +29,7 @@ struct PlayerController : public ScriptBehaviour
 	Camera* camera = nullptr;
 	bool reverse = false;
 	bool audioPlayed = false;
+	bool canStart = false;
 	int speed = 6;
 	Rigidbody* rb = nullptr;
 };

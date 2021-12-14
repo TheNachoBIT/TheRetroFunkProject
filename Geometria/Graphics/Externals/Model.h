@@ -131,6 +131,8 @@ public:
 	std::vector<int> newIndexVertices;
 	std::vector<Vertex*> bufferVertices;
 
+	bool flipXTexture = false, flipYTexture = false;
+
 	Matrix translationMatrix, rotationMatrix, finalMatrix;
 
 	Model()
@@ -187,10 +189,8 @@ public:
 
 	void ChangeModelIndex(int index, int result);
 
-	void AddTexture(Texture& tex)
-	{
-		texture = &tex;
-	}
+	void SetTexture(Texture& tex);
+	void FlipTexture(bool x, bool y);
 
 	static void SetTextureIntoModel(Model* model, std::string* path);
 

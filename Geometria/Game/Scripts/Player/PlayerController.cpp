@@ -20,8 +20,8 @@ void PlayerController::OnStart()
 	rb->freezePositionX = true;
 	rb->freezePositionZ = true;
 
-	PhysicsManager::SetGravity(Vector3(0, -35, 0));
-	GetTransform().position = Vector3(-10, 0.5, 0);
+	PhysicsManager::SetGravity(Vector3(0, -25, 0));
+	GetTransform().position = Vector3(-7, 0.5, 0);
 
 	offset = Vector3(2, 0, 11);
 }
@@ -48,21 +48,16 @@ void PlayerController::CameraUpdate()
 
 void PlayerController::OnUpdate()
 {
-	if (!audioPlayed)
-	{
-		GetScript<AudioSource>()->Play();
-		audioPlayed = true;
-	}
-	else
+	if(canStart)
 	{
 		if (PhysicsManager::Raycast(Vector3(GetTransform().position.x, GetTransform().position.y - 0.55f, GetTransform().position.z), Vector3::down(), 0.01))
 		{
 			if (Input::GetKey(GLFW_KEY_SPACE))
 			{
 				if (reverse)
-					rb->SetVelocity(Vector3(0, -14, 0));
+					rb->SetVelocity(Vector3(0, -11, 0));
 				else
-					rb->SetVelocity(Vector3(0, 14, 0));
+					rb->SetVelocity(Vector3(0, 11, 0));
 			}
 		}
 		GetTransform().position += Vector3(5.2 * Graphics::DeltaTime(), 0, 0);
@@ -72,18 +67,23 @@ void PlayerController::OnUpdate()
 			reverse = !reverse;
 
 			if (reverse)
-				PhysicsManager::SetGravity(Vector3(0, 35, 0));
+				PhysicsManager::SetGravity(Vector3(0, 30, 0));
 			else
-				PhysicsManager::SetGravity(Vector3(0, -35, 0));
+				PhysicsManager::SetGravity(Vector3(0, -30, 0));
 		}
-
-		CameraUpdate();
 
 		if (GetTransform().position.y < -2)
 		{
 			rb->GetRigidbodyTransform().position = Vector3(GetTransform().position.x, 0.5, GetTransform().position.z);
 		}
 	}
+	else if (Input::GetKeyDown(GLFW_KEY_ENTER))
+	{
+		GetScript<AudioSource>()->Play();
+		canStart = true;
+	}
+
+	CameraUpdate();
 }
 
 void PlayerController::OnInspector()

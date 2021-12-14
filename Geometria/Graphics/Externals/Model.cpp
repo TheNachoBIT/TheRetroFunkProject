@@ -192,17 +192,36 @@ void Model::ChangeModelIndex(int index, int result)
 	indexVertices[index] = result;
 }
 
+void Model::SetTexture(Texture& tex)
+{
+	texture = &tex;
+	if (indexVertices.size() != 0)
+		OnChange(false, false);
+}
+
+void Model::FlipTexture(bool x, bool y)
+{
+	flipXTexture = x;
+	flipYTexture = y;
+	if (indexVertices.size() != 0)
+		OnChange(false, false);
+}
+
 void Model::OnChange(bool modifyTransform, bool reCheck)
 {
 	//YO
 	/*if (modifyTransform)
 	{*/
-	translationMatrix = Matrix(1);
-	translationMatrix = Matrix::Translate(Vector3(-transform.position.x, -transform.position.y, -transform.position.z));
 
-	rotationMatrix = Matrix::Rotate(Vector3(transform.rotation.x, transform.rotation.y, transform.rotation.z + 180.0f));
+	if (modifyTransform)
+	{
+		translationMatrix = Matrix(1);
+		translationMatrix = Matrix::Translate(Vector3(-transform.position.x, -transform.position.y, -transform.position.z));
 
-	finalMatrix = translationMatrix * rotationMatrix * -translationMatrix;
+		rotationMatrix = Matrix::Rotate(Vector3(transform.rotation.x, transform.rotation.y, transform.rotation.z + 180.0f));
+
+		finalMatrix = translationMatrix * rotationMatrix * -translationMatrix;
+	}
 
 	if (indexVertices.size() != 0)
 	{
@@ -297,34 +316,45 @@ void Model::OnChange(bool modifyTransform, bool reCheck)
 			{
 				d.allVerts[indexVertices[i]].textureGroupId = texture->texGroupId;
 
+				float x = (float)texture->finalRect.x,
+					y = (float)texture->finalRect.y,
+					width = (float)texture->finalRect.x + (float)texture->finalRect.width,
+					height = (float)texture->finalRect.y + (float)texture->finalRect.height;
+
+				if (flipXTexture)
+					std::swap(x, width);
+
+				if (flipYTexture)
+					std::swap(y, height);
+
 				switch (texCount)
 				{
 				case 0:
 					d.allVerts[indexVertices[i]].texCoords =
-						glm::vec2((float)texture->finalRect.x / (float)TextureManager::textureGroups[texture->texGroupId].width,
-							(float)texture->finalRect.y / (float)TextureManager::textureGroups[texture->texGroupId].height);
+						glm::vec2(x / (float)TextureManager::textureGroups[texture->texGroupId].width,
+							y / (float)TextureManager::textureGroups[texture->texGroupId].height);
 
 					texCount++;
 					break;
 				case 1:
 					d.allVerts[indexVertices[i]].texCoords =
-						glm::vec2((float)texture->finalRect.x / (float)TextureManager::textureGroups[texture->texGroupId].width,
-							((float)texture->finalRect.y + (float)texture->finalRect.height) / (float)TextureManager::textureGroups[texture->texGroupId].height);
+						glm::vec2(x / (float)TextureManager::textureGroups[texture->texGroupId].width,
+							height / (float)TextureManager::textureGroups[texture->texGroupId].height);
 
 					texCount++;
 					break;
 				case 2:
 
 					d.allVerts[indexVertices[i]].texCoords =
-						glm::vec2(((float)texture->finalRect.x + (float)texture->finalRect.width) / (float)TextureManager::textureGroups[texture->texGroupId].width,
-							((float)texture->finalRect.y + (float)texture->finalRect.height) / (float)TextureManager::textureGroups[texture->texGroupId].height);
+						glm::vec2(width / (float)TextureManager::textureGroups[texture->texGroupId].width,
+							height / (float)TextureManager::textureGroups[texture->texGroupId].height);
 
 					texCount++;
 					break;
 				case 3:
 					d.allVerts[indexVertices[i]].texCoords =
-						glm::vec2(((float)texture->finalRect.x + (float)texture->finalRect.width) / (float)TextureManager::textureGroups[texture->texGroupId].width,
-							(float)texture->finalRect.y / (float)TextureManager::textureGroups[texture->texGroupId].height);
+						glm::vec2(width / (float)TextureManager::textureGroups[texture->texGroupId].width,
+							y / (float)TextureManager::textureGroups[texture->texGroupId].height);
 
 					texCount = 0;
 					break;

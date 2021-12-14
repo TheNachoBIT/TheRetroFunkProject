@@ -68,34 +68,45 @@ void RendererCore::AddModel(Model& m, DrawCall& d)
 		{
 			m.vertices[i].textureGroupId = m.texture->texGroupId;
 
+			float x = (float)m.texture->finalRect.x,
+				y = (float)m.texture->finalRect.y,
+				width = (float)m.texture->finalRect.x + (float)m.texture->finalRect.width,
+				height = (float)m.texture->finalRect.y + (float)m.texture->finalRect.height;
+
+			if (m.flipXTexture)
+				std::swap(x, width);
+
+			if (m.flipYTexture)
+				std::swap(y, height);
+
 			switch (texCount)
 			{
 			case 0:
 				m.vertices[i].texCoords =
-					glm::vec2((float)m.texture->finalRect.x / (float)TextureManager::textureGroups[m.texture->texGroupId].width,
-						(float)m.texture->finalRect.y / (float)TextureManager::textureGroups[m.texture->texGroupId].height);
+					glm::vec2(x / (float)TextureManager::textureGroups[m.texture->texGroupId].width,
+						y / (float)TextureManager::textureGroups[m.texture->texGroupId].height);
 
 				texCount++;
 				break;
 			case 1:
 				m.vertices[i].texCoords =
-					glm::vec2((float)m.texture->finalRect.x / (float)TextureManager::textureGroups[m.texture->texGroupId].width,
-						((float)m.texture->finalRect.y + (float)m.texture->finalRect.height) / (float)TextureManager::textureGroups[m.texture->texGroupId].height);
+					glm::vec2(x / (float)TextureManager::textureGroups[m.texture->texGroupId].width,
+						height / (float)TextureManager::textureGroups[m.texture->texGroupId].height);
 
 				texCount++;
 				break;
 			case 2:
 
 				m.vertices[i].texCoords =
-					glm::vec2(((float)m.texture->finalRect.x + (float)m.texture->finalRect.width) / (float)TextureManager::textureGroups[m.texture->texGroupId].width,
-						((float)m.texture->finalRect.y + (float)m.texture->finalRect.height) / (float)TextureManager::textureGroups[m.texture->texGroupId].height);
+					glm::vec2(width / (float)TextureManager::textureGroups[m.texture->texGroupId].width,
+						height / (float)TextureManager::textureGroups[m.texture->texGroupId].height);
 
 				texCount++;
 				break;
 			case 3:
 				m.vertices[i].texCoords =
-					glm::vec2(((float)m.texture->finalRect.x + (float)m.texture->finalRect.width) / (float)TextureManager::textureGroups[m.texture->texGroupId].width,
-						(float)m.texture->finalRect.y / (float)TextureManager::textureGroups[m.texture->texGroupId].height);
+					glm::vec2(width / (float)TextureManager::textureGroups[m.texture->texGroupId].width,
+						y / (float)TextureManager::textureGroups[m.texture->texGroupId].height);
 
 				texCount = 0;
 				break;

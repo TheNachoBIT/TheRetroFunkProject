@@ -12,6 +12,8 @@
 #include "PxPhysics.h"
 #include "PxPhysicsAPI.h"
 
+struct BoxCollider;
+
 #include <vector>
 
 #define PHYSICSMANAGER_H
@@ -61,8 +63,8 @@ public:
 
 	static void SetGravity(Vector3 g);
 
-	static physx::PxRigidStatic* CreateStaticBox(Vector3 position, Vector3 scale);
-	static physx::PxRigidDynamic* CreateDynamicBox(Vector3 position, Vector3 scale);
+	static physx::PxRigidStatic* CreateStaticBox(BoxCollider& collider, Vector3 position, Vector3 scale);
+	static physx::PxRigidDynamic* CreateDynamicBox(BoxCollider& collider, Vector3 position, Vector3 scale);
 
 	static bool Raycast(Vector3 origin, Vector3 direction, int maxDistance);
 };

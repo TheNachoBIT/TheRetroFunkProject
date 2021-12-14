@@ -22,8 +22,11 @@ struct BoxCollider : public ScriptBehaviour
 
 	physx::PxShape* boxShape = nullptr;
 
+	Vector3 size = Vector3(1);
+
 	void OnStart();
 	void OnInspector();
 	void OnSave();
 	void OnUpdate();
+	void SetScale(Vector3 size);
 };

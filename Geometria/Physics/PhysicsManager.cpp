@@ -95,7 +95,7 @@ void PhysicsManager::SetGravity(Vector3 g)
 	gScene->setGravity(physx::PxVec3(gravity.x, gravity.y, gravity.z));
 }
 
-physx::PxRigidStatic* PhysicsManager::CreateStaticBox(Vector3 position, Vector3 scale)
+physx::PxRigidStatic* PhysicsManager::CreateStaticBox(BoxCollider& collider, Vector3 position, Vector3 scale)
 {
 	physx::PxShape* boxShape = PhysicsManager::gPhysics->createShape(physx::PxBoxGeometry(scale.x / 2, scale.y / 2, scale.z / 2), *PhysicsManager::gMaterial);
 
@@ -108,12 +108,13 @@ physx::PxRigidStatic* PhysicsManager::CreateStaticBox(Vector3 position, Vector3 
 	return boxStatic;
 }
 
-physx::PxRigidDynamic* PhysicsManager::CreateDynamicBox(Vector3 position, Vector3 scale)
+physx::PxRigidDynamic* PhysicsManager::CreateDynamicBox(BoxCollider& collider, Vector3 position, Vector3 scale)
 {
 	physx::PxShape* boxShape = PhysicsManager::gPhysics->createShape(physx::PxBoxGeometry(scale.x / 2, scale.y / 2, scale.z / 2), *PhysicsManager::gMaterial);
+	collider.boxShape = boxShape;
 
-	physx::PxRigidDynamic* boxDynamic = physx::PxCreateDynamic(*PhysicsManager::gPhysics, 
-		physx::PxTransform(physx::PxVec3(position.x, position.y, position.z)), 
+	physx::PxRigidDynamic* boxDynamic = physx::PxCreateDynamic(*PhysicsManager::gPhysics,
+		physx::PxTransform(physx::PxVec3(position.x, position.y, position.z)),
 		*boxShape, 0);
 
 	PhysicsManager::allDynamics.push_back(boxDynamic);
