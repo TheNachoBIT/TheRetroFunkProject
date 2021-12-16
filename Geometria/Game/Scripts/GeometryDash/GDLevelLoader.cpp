@@ -188,6 +188,26 @@ void GDLevelLoader::LoadCustomProperties()
 	AddCustomSize(15, Vector3(0.21 * 1.5, 1.33 * 1.5, 1));
 	AddCustomSize(16, Vector3(0.2 * 1.5, 0.88 * 1.5, 1));
 	AddCustomSize(17, Vector3(0.18 * 1.5, 0.41 * 1.5, 1));
+	//- Portals		[portal_XX_front_001.png]
+	AddCustomSize(10, Vector3(50.f / 60, 150.f / 60, 1));//gravity down		( 1)
+	AddCustomSize(11, Vector3(50.f / 60, 150.f / 60, 1));//gravity up			( 2)
+	AddCustomSize(12, Vector3(68.f / 60, 172.f / 60, 1));//cube				( 3)
+	AddCustomSize(13, Vector3(68.f / 60, 172.f / 60, 1));//ship				( 4)
+	AddCustomSize(45, Vector3(88.f / 60, 184.f / 60, 1));//mirror				( 5)
+	AddCustomSize(46, Vector3(88.f / 60, 184.f / 60, 1));//unmirror			( 6)
+	AddCustomSize(47, Vector3(68.f / 60, 172.f / 60, 1));//ball				( 7)
+	AddCustomSize(99, Vector3(62.f / 60, 180.f / 60, 1));//unmini				( 8)
+	AddCustomSize(101, Vector3(62.f / 60, 180.f / 60, 1));//mini				( 9)
+	AddCustomSize(111, Vector3(68.f / 60, 172.f / 60, 1));//ufo				(10)
+	AddCustomSize(286, Vector3(82.f / 60, 182.f / 60, 1));//dual mode			(11)
+	AddCustomSize(287, Vector3(82.f / 60, 182.f / 60, 1));//undual mode		(12)
+	AddCustomSize(660, Vector3(68.f / 60, 172.f / 60, 1));//wave				(13)
+	AddCustomSize(745, Vector3(68.f / 60, 172.f / 60, 1));//robot				(14)
+	AddCustomSize(747, Vector3(78.f / 60, 180.f / 60, 1));//teleport in		(15)
+	AddCustomSize(749, Vector3(78.f / 60, 180.f / 60, 1));//teleport out		(16)
+	AddCustomSize(1331, Vector3(68.f / 60, 172.f / 60, 1));//robot				(17)
+	//- differently-scaled blocks
+	// what the fuck rob
 
 	//No Collisions
 	//|
