@@ -290,34 +290,19 @@ void RendererCore::OpenGL_Start_DrawCall(DrawCall& d)
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, d.allIndices.size() * sizeof(uint32_t), &d.allIndices[0], GL_DYNAMIC_DRAW);
 		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
-		int pointerPosition = 0;
-
-		if (!Graphics::IsIntelGPU() || !Application::IsPlatform(Application::Platform::Windows) || Graphics::IsIntelGPUBypassed())
+		if (Application::IsPlatform(Application::Platform::Windows))
 		{
-			glVertexAttribPointer(pointerPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
-			glEnableVertexAttribArray(pointerPosition);
-			pointerPosition++;
+			if (Graphics::IsIntelGPU())
+				SetVAttr_IntelWindows(d);
+			else if (Graphics::IsAMDGPU())
+				SetVAttr_AMDWindows(d);
+			else
+				SetVAttr_Universal(d);
 		}
-
-		glVertexAttribPointer(pointerPosition, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-		glEnableVertexAttribArray(pointerPosition);
-		pointerPosition++;
-
-		glVertexAttribPointer(pointerPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
-		glEnableVertexAttribArray(pointerPosition);
-		pointerPosition++;
-
-		glVertexAttribPointer(pointerPosition, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureGroupId));
-		glEnableVertexAttribArray(pointerPosition);
-		pointerPosition++;
-
-		if (Graphics::IsIntelGPU() && Application::IsPlatform(Application::Platform::Windows))
+		else
 		{
-			glVertexAttribPointer(pointerPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
-			glEnableVertexAttribArray(pointerPosition);
+			SetVAttr_Universal(d);
 		}
-
-		glBindVertexArray(0);
 	}
 
 	if (d.type == DrawCall::Type::UI)
@@ -327,6 +312,93 @@ void RendererCore::OpenGL_Start_DrawCall(DrawCall& d)
 		ImGui_ImplOpenGL3_Init("#version 130");
 		ImGui::StyleColorsDark();
 	}
+}
+
+void RendererCore::SetVAttr_Universal(DrawCall& d)
+{
+	int pointerPosition = 0;
+
+	// Vertex Position
+	glVertexAttribPointer(pointerPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	// Color
+	glVertexAttribPointer(pointerPosition, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	// Texture UV Coordinates
+	glVertexAttribPointer(pointerPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	// Texture Group ID
+	glVertexAttribPointer(pointerPosition, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureGroupId));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	glBindVertexArray(0);
+}
+
+void RendererCore::SetVAttr_AMDWindows(DrawCall& d)
+{
+	int pointerPosition = 0;
+
+	// Differences with Universal:
+	// - To be honest, i don't fucking know what the fuck the AMD Windows Drivers even want at this point
+
+	// Texture Group ID
+	glVertexAttribPointer(pointerPosition, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureGroupId));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	// Color
+	glVertexAttribPointer(pointerPosition, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	// Vertex Position
+	glVertexAttribPointer(pointerPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	// Texture UV Coordinates
+	glVertexAttribPointer(pointerPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	glBindVertexArray(0);
+}
+
+void RendererCore::SetVAttr_IntelWindows(DrawCall& d)
+{
+	int pointerPosition = 0;
+
+	// Diferences with Universal:
+	// - Intel on Windows wants to send everything but the position first.
+
+	// Color
+	glVertexAttribPointer(pointerPosition, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	// Texture UV Coordinates
+	glVertexAttribPointer(pointerPosition, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	// Texture Group ID
+	glVertexAttribPointer(pointerPosition, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureGroupId));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	// Vertex Position
+	glVertexAttribPointer(pointerPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+	glEnableVertexAttribArray(pointerPosition);
+	pointerPosition++;
+
+	glBindVertexArray(0);
 }
 
 int RendererCore::WindowWidth()

@@ -189,6 +189,12 @@ bool Graphics::IsIntelGPU()
 	return Graphics::ShowGraphicsCard().find("Intel") != std::string::npos;
 }
 
+bool Graphics::IsAMDGPU()
+{
+	std::cout << "[GPU] " << Graphics::ShowGraphicsCard() << std::endl;
+	return Graphics::ShowGraphicsCard().find("Radeon") != std::string::npos || Graphics::ShowGraphicsCard().find("AMD") != std::string::npos;
+}
+
 void Graphics::GPU_CreateBuffer(uint32_t& bufferObject, int bufferType, int size, void* data)
 {
 

@@ -18,9 +18,7 @@ IncludeDirectories["YAMLCPP"] = "Libraries/YAMLCPP/YAMLCPPCore/include"
 IncludeDirectories["NVIDIAPHYSX"] = "Libraries/NVIDIAPHYSX/include"
 IncludeDirectories["NVIDIAPHYSXSHARED"] = "Libraries/NVIDIAPHYSX/pxshared/include"
 
-if(system == "windows") then
 include "Libraries/CURL"
-end
 IncludeDirectories["CURL"] = "Libraries/CURL/include"
 
 include "Libraries/ZLIB"

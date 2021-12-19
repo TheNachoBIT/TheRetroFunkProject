@@ -42,6 +42,10 @@ public:
 	static void SetUpWorldMatrix();
 	static void Render();
 
+	static void SetVAttr_Universal(DrawCall& d);
+	static void SetVAttr_AMDWindows(DrawCall& d);
+	static void SetVAttr_IntelWindows(DrawCall& d);
+
 	static void EndThreads();
 
 	static void SortVertices();

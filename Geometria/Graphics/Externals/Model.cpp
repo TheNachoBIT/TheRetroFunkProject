@@ -314,50 +314,57 @@ void Model::OnChange(bool modifyTransform, bool reCheck)
 
 			if (texture != nullptr)
 			{
-				d.allVerts[indexVertices[i]].textureGroupId = texture->texGroupId;
-
-				float x = (float)texture->finalRect.x,
-					y = (float)texture->finalRect.y,
-					width = (float)texture->finalRect.x + (float)texture->finalRect.width,
-					height = (float)texture->finalRect.y + (float)texture->finalRect.height;
-
-				if (flipXTexture)
-					std::swap(x, width);
-
-				if (flipYTexture)
-					std::swap(y, height);
-
-				switch (texCount)
+				if (texture->width != 0 || texture->height != 0)
 				{
-				case 0:
-					d.allVerts[indexVertices[i]].texCoords =
-						glm::vec2(x / (float)TextureManager::textureGroups[texture->texGroupId].width,
-							y / (float)TextureManager::textureGroups[texture->texGroupId].height);
+					d.allVerts[indexVertices[i]].textureGroupId = texture->texGroupId;
 
-					texCount++;
-					break;
-				case 1:
-					d.allVerts[indexVertices[i]].texCoords =
-						glm::vec2(x / (float)TextureManager::textureGroups[texture->texGroupId].width,
-							height / (float)TextureManager::textureGroups[texture->texGroupId].height);
+					float x = (float)texture->finalRect.x,
+						y = (float)texture->finalRect.y,
+						width = (float)texture->finalRect.x + (float)texture->finalRect.width,
+						height = (float)texture->finalRect.y + (float)texture->finalRect.height;
 
-					texCount++;
-					break;
-				case 2:
+					if (flipXTexture)
+						std::swap(x, width);
 
-					d.allVerts[indexVertices[i]].texCoords =
-						glm::vec2(width / (float)TextureManager::textureGroups[texture->texGroupId].width,
-							height / (float)TextureManager::textureGroups[texture->texGroupId].height);
+					if (flipYTexture)
+						std::swap(y, height);
 
-					texCount++;
-					break;
-				case 3:
-					d.allVerts[indexVertices[i]].texCoords =
-						glm::vec2(width / (float)TextureManager::textureGroups[texture->texGroupId].width,
-							y / (float)TextureManager::textureGroups[texture->texGroupId].height);
+					switch (texCount)
+					{
+					case 0:
+						d.allVerts[indexVertices[i]].texCoords =
+							glm::vec2(x / (float)TextureManager::textureGroups[texture->texGroupId].width,
+								y / (float)TextureManager::textureGroups[texture->texGroupId].height);
 
-					texCount = 0;
-					break;
+						texCount++;
+						break;
+					case 1:
+						d.allVerts[indexVertices[i]].texCoords =
+							glm::vec2(x / (float)TextureManager::textureGroups[texture->texGroupId].width,
+								height / (float)TextureManager::textureGroups[texture->texGroupId].height);
+
+						texCount++;
+						break;
+					case 2:
+
+						d.allVerts[indexVertices[i]].texCoords =
+							glm::vec2(width / (float)TextureManager::textureGroups[texture->texGroupId].width,
+								height / (float)TextureManager::textureGroups[texture->texGroupId].height);
+
+						texCount++;
+						break;
+					case 3:
+						d.allVerts[indexVertices[i]].texCoords =
+							glm::vec2(width / (float)TextureManager::textureGroups[texture->texGroupId].width,
+								y / (float)TextureManager::textureGroups[texture->texGroupId].height);
+
+						texCount = 0;
+						break;
+					}
+				}
+				else
+				{
+					d.allVerts[indexVertices[i]].textureGroupId = -1;
 				}
 
 				/*std::cout << "Verts: " << d.allVerts[indexVertices[i]].texCoords.x << " " << d.allVerts[indexVertices[i]].texCoords.y << std::endl;

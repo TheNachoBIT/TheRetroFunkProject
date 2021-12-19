@@ -41,6 +41,7 @@ public:
 	//=================================[ GPU ]=================================//
 	static std::string ShowGraphicsCard();
 	static bool IsIntelGPU();
+	static bool IsAMDGPU();
 
 	static void GPU_CreateBuffer(uint32_t& bufferObject, int bufferType, int size, void* data);
 	static void GPU_CreateBuffers(uint32_t& vertexArrayObject, uint32_t& vertexBuffer, uint32_t& indexBuffer, float* vertices);
