@@ -4,7 +4,7 @@ This project has two licenses:
 - The "RetroFunk Project" uses the GPLv3 License (see the "RFP-LICENSE" file).
 
 
-# Geometria Engine
+# The RetroFunk Project
 
 ![Stars](https://img.shields.io/github/stars/TheNachoBIT/GeometriaEngine)
 ![Issues](https://img.shields.io/github/issues/TheNachoBIT/GeometriaEngine)
