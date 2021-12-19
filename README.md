@@ -6,9 +6,9 @@ This project has two licenses:
 
 # The RetroFunk Project
 
-![Stars](https://img.shields.io/github/stars/TheNachoBIT/GeometriaEngine)
-![Issues](https://img.shields.io/github/issues/TheNachoBIT/GeometriaEngine)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![Stars](https://img.shields.io/github/stars/TheNachoBIT/TheRetroFunkProject)
+![Issues](https://img.shields.io/github/issues/TheNachoBIT/TheRetroFunkProject)
+![License](https://img.shields.io/badge/license-GPLv3-blue)
 
 ## Installation
 
