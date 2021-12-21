@@ -69,13 +69,12 @@ void Application::Start()
 
 	RendererCore::SetUp();
 
-	RFPLevelScene::Init();
-
 	Application::SetEditor();
 
 	RendererCore::Start();
 
 	//Application::SetGame();
+	RFPLevelScene::Init();
 
 	//Editor::Begin();
 }

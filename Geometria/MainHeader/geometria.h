@@ -9,6 +9,7 @@
 #include "../Compiler/CompilationCore.h"
 #include "../CommonObjects/Empty.h"
 #include "../WebRequest/WebRequest.h"
+#include "Files/GUIML/GUIML.h"
 #undef CreateWindow
 #ifndef TRUE
 #define TRUE 1

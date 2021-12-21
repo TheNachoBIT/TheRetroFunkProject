@@ -1,4 +1,6 @@
 #pragma once
+#ifndef IMGUIELEMENT_H
+#define IMGUIELEMENT_H
 #include "../../Behaviours/Behaviour.h"
 
 #include "../../ImGUI/imgui.h"
@@ -319,4 +321,4 @@ public:
 		return i;
 	}
 };
-
+#endif
