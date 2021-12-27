@@ -1,7 +1,7 @@
 COPYRIGHT WARNING:
 This project has two licenses: 
 - The "Geometria Engine" uses the MIT License (see the "LICENSE" file).
-- The "RetroFunk Project" uses the GPLv3 License (see the "RFP-LICENSE" file).
+- The "RetroFunk Project" uses its own GPLv3 License with other conditions attached (see the "RFP-LICENSE" file).
 
 
 # The RetroFunk Project
