@@ -45,6 +45,12 @@ public:
 		Static
 	};
 
+	enum Mode
+	{
+		To3D,
+		To2D
+	};
+
 	int id = 0;
 	int sceneId = 0;
 
@@ -66,6 +72,7 @@ public:
 
 	Type type = Type::Dynamic;
 	Sorting sort = Sorting::Update;
+	Mode mode = Mode::To3D;
 
 	int _lastVertCount = 0;
 	int _lastIndexCount = 0;
@@ -83,7 +90,7 @@ public:
 	int highestModelId = 0;
 	int updateCounter = 0;
 
-	bool updateHybrid = false, isMain = false;
+	bool updateHybrid = false, isMain = false, updateSorting = false;
 
 	int mvIndexBegin, mvIndexEnd;
 

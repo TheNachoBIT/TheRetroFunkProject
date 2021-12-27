@@ -2,6 +2,9 @@
 #include "Base64/base64.h"
 #include "zlib.h"
 
+#define POCKETLZMA_LZMA_C_DEFINE
+#include "LZMA/pocketlzma.hpp"
+
 std::string Encryption::Base64::Encode(std::string t)
 {
     return base64_encode(t);
@@ -132,4 +135,26 @@ std::string Encryption::ZLib::Inflate(std::string t, ZLib::Format format)
     }
 
     return outstring;
+}
+
+std::string Encryption::LZMA::Compress(std::string t)
+{
+    std::vector<uint8_t> data(t.begin(), t.end());
+    std::vector<uint8_t> compressedData;
+    plz::PocketLzma p;
+    /*!
+     *  Possibilities:
+     *  Default
+     *  Fastest
+     *  Fast
+     *  GoodCompression
+     *  BestCompression
+     */
+    p.usePreset(plz::Preset::Default);
+    plz::StatusCode status = p.compress(data, compressedData);
+    if (status == plz::StatusCode::Ok)
+    {
+        return std::string(compressedData.begin(), compressedData.end());
+    }
+    return std::string();
 }

@@ -4,9 +4,13 @@
 #include "nlohmann/json.hpp"
 #include <experimental/filesystem>
 
+#include "Files/ZIP/unzip.h"
+
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+
+#undef CreateDirectory
 
 std::string Files::Read(const char* url)
 {
@@ -144,6 +148,125 @@ bool Files::LoadScene(std::string file)
     
 
     return true;
+}
+
+void Files::CreateDirectory(const char* url)
+{
+    std::experimental::filesystem::create_directories(url);
+}
+
+int Files::UnZIP(const char* zipUrl)
+{
+    unzFile zipfile = unzOpen(zipUrl);
+    if (zipfile == NULL)
+    {
+        printf("%s: not found\n");
+        return -1;
+    }
+
+    // Get info about the zip file
+    unz_global_info global_info;
+    if (unzGetGlobalInfo(zipfile, &global_info) != UNZ_OK)
+    {
+        printf("could not read file global info\n");
+        unzClose(zipfile);
+        return -1;
+    }
+
+    // Buffer to hold data read from the zip file.
+    char read_buffer[8192];
+
+    // Loop to extract all files
+    uLong i;
+    for (i = 0; i < global_info.number_entry; ++i)
+    {
+        // Get info about current file.
+        unz_file_info file_info;
+        char filename[512];
+        if (unzGetCurrentFileInfo(
+            zipfile,
+            &file_info,
+            filename,
+            512,
+            NULL, 0, NULL, 0) != UNZ_OK)
+        {
+            printf("could not read file info\n");
+            unzClose(zipfile);
+            return -1;
+        }
+
+        std::string fullUrl = Files::GetDirectoryOf(zipUrl);
+        fullUrl += "/";
+        fullUrl += filename;
+
+        // Check if this entry is a directory or file.
+        const size_t filename_length = strlen(filename);
+        if (filename[filename_length - 1] == '/')
+        {
+            // Entry is a directory, so create it.
+            //printf("dir:%s\n", filename);
+            Files::CreateDirectory(fullUrl.c_str());
+        }
+        else
+        {
+            // Entry is a file, so extract it.
+            //printf("file:%s\n", filename);
+            if (unzOpenCurrentFile(zipfile) != UNZ_OK)
+            {
+                printf("could not open file\n");
+                unzClose(zipfile);
+                return -1;
+            }
+
+            // Open a file to write out the data.
+            FILE* out = fopen(fullUrl.c_str(), "wb");
+            if (out == NULL)
+            {
+                printf("could not open destination file\n");
+                unzCloseCurrentFile(zipfile);
+                unzClose(zipfile);
+                return -1;
+            }
+
+            int error = UNZ_OK;
+            do
+            {
+                error = unzReadCurrentFile(zipfile, read_buffer, 8192);
+                if (error < 0)
+                {
+                    printf("error %d\n", error);
+                    unzCloseCurrentFile(zipfile);
+                    unzClose(zipfile);
+                    return -1;
+                }
+
+                // Write data to file.
+                if (error > 0)
+                {
+                    fwrite(read_buffer, error, 1, out); // You should check return of fwrite...
+                }
+            } while (error > 0);
+
+            fclose(out);
+        }
+
+        unzCloseCurrentFile(zipfile);
+
+        // Go the the next entry listed in the zip file.
+        if ((i + 1) < global_info.number_entry)
+        {
+            if (unzGoToNextFile(zipfile) != UNZ_OK)
+            {
+                printf("cound not read next file\n");
+                unzClose(zipfile);
+                return -1;
+            }
+        }
+    }
+
+    unzClose(zipfile);
+
+    return 0;
 }
 
 std::string Files::GetDirectoryOf(const char* file)

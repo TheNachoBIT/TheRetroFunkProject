@@ -111,6 +111,9 @@ public:
 	int SceneBelongsTo = 0;
 	int DWBelongsTo = 0;
 
+	int sortingLayer = 0;
+	int sortingOrder = 0;
+
 	Texture* texture = nullptr;
 	bool initialized = false;
 

@@ -19,6 +19,12 @@ struct Encryption
 		static std::string Run(std::string t, int key);
 	};
 
+	struct LZMA
+	{
+		static std::string Compress(std::string t);
+		static std::string UnCompress(std::string t);
+	};
+
 	struct ZLib
 	{
 		enum class Format

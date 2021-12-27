@@ -33,6 +33,8 @@ public:
 	static void AddModel(Model& m);
 	static void AddModel(Model& m, DrawCall& d);
 
+	static void UpdateSorting(DrawCall& d);
+
 	static void AddImGUIElement(ImGUIElement& i);
 	static void AddImGUIElement(ImGUIElement& i, DrawCall& d);
 

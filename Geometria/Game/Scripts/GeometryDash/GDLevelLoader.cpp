@@ -21,6 +21,12 @@ void GDLevelLoader::OnStart()
 
 	std::string urlResult = response.body;*/
 
+	std::string content = Files::Read("Game/Textures/Blocks.zip", true);
+	content = Encryption::LZMA::Compress(content);
+	Files::Write("Game/Textures/Blocks.retropkg", content);
+
+	//std::cout << Files::GetDirectoryOf("Game/Textures/Blocks/blocks.gtxp") << std::endl;
+
 	GDTextures = TextureManager::OpenTexturePack("Game/Textures/Blocks/blocks.gtxp");
 
 	//TextureManager::OpenSpriteSheet("Game/Textures/Blocks/GJ_GameSheet.plist");
@@ -71,7 +77,7 @@ void GDLevelLoader::ReadLevel(std::string rawData)
 	{
 		if (!StringAPI::StartsWith(i, "kS"))
 		{
-			int objId = 0;
+			int objId = 0, sortingLayer = 0, sortingOrder = 0;
 			Vector3 position, rotation, scale(1);
 			bool fX = false, fY = false, noC = false;
 			std::vector<std::string> allValues = StringAPI::SplitIntoVector(i, ",");
@@ -145,6 +151,16 @@ void GDLevelLoader::ReadLevel(std::string rawData)
 						colorID = std::stoi(results[i]);
 						break;*/
 
+					//Sorting Layer
+					case 24:
+						sortingLayer = result;
+						break;
+
+					//Sorting Order
+					case 25:
+						sortingOrder = result;
+						break;
+
 					// XY Scale
 					case 32:
 						if (scale.x != 0 && scale.y != 0)
@@ -158,6 +174,9 @@ void GDLevelLoader::ReadLevel(std::string rawData)
 			}
 			
 			Model* newObj = new Model(Model::Square(), position, rotation, scale);
+
+			newObj->sortingLayer = sortingLayer;
+			newObj->sortingOrder = sortingOrder;
 
 			newObj->FlipTexture(fX, fY);
 
@@ -177,6 +196,8 @@ void GDLevelLoader::ReadLevel(std::string rawData)
 			RendererCore::AddModel(*newObj);
 		}
 	}
+
+	RendererCore::UpdateSorting(*SceneManager::MainScene().MainDrawCall());
 }
 
 void GDLevelLoader::LoadCustomProperties()

@@ -21,5 +21,8 @@ struct Files
 	static bool SaveImage(std::string output, std::vector<unsigned char> data, int width, int height);
 	static bool LoadScene(std::string file);
 
+	static int UnZIP(const char* url);
+
+	static void CreateDirectory(const char* url);
 	static std::string GetDirectoryOf(const char* file);
 };

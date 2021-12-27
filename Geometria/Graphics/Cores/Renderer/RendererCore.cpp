@@ -126,6 +126,11 @@ void RendererCore::AddModel(Model& m, DrawCall& d)
 	//m.PrintData();
 }
 
+void RendererCore::UpdateSorting(DrawCall& d)
+{
+	d.updateSorting = true;
+}
+
 void RendererCore::AddImGUIElement(ImGUIElement& i)
 {
 	AddImGUIElement(i, *SceneManager::MainScene().MainDrawCall());
@@ -568,7 +573,7 @@ void RendererCore::SortVertices()
 					doSort = false;*/
 
 				bool startupSort = DrawCall::Sorting::AtStartup && d.start < 2;
-				if (d.sort == DrawCall::Sorting::Update || startupSort)
+				if (d.sort == DrawCall::Sorting::Update || startupSort || d.updateSorting)
 				{
 					std::vector<int> change;
 
@@ -580,6 +585,14 @@ void RendererCore::SortVertices()
 
 					std::sort(d.allModels.begin(), d.allModels.end(), [&](Model* i, Model* j)
 						{
+							if (d.mode == DrawCall::Mode::To2D)
+							{
+								if (i->sortingLayer == j->sortingLayer)
+									return i->sortingLayer == j->sortingLayer && i->sortingOrder > j->sortingOrder;
+
+								return i->sortingLayer > j->sortingLayer;
+							}
+
 							return Vector3::Distance(i->transform.position + i->transform.scale, Graphics::MainCamera()->GetCurrentPosition()) > Vector3::Distance(j->transform.position + j->transform.scale, Graphics::MainCamera()->GetCurrentPosition());
 						});
 
@@ -659,6 +672,9 @@ void RendererCore::SortVertices()
 				{
 					//std::cout << draw << ": Not Updating!" << std::endl;
 				}
+
+				if (d.updateSorting)
+					d.updateSorting = false;
 			}
 			else
 			{

@@ -14,6 +14,7 @@ void RFPLevelScene::Init()
 {
 	SceneManager::MainScene().MainDrawCall()->type = DrawCall::Type::Dynamic;
 	SceneManager::MainScene().MainDrawCall()->sort = DrawCall::Sorting::AtStartup;
+	SceneManager::MainScene().MainDrawCall()->mode = DrawCall::Mode::To2D;
 	//Model Initialization
 
 	Graphics::MainCamera()->transform.position = Vector3(0, 10, 6.5);
@@ -30,14 +31,14 @@ void RFPLevelScene::Init()
 	std::cout << "Player Added!" << std::endl;
 	RendererCore::AddModel(*RFPPlayer);
 
-	UIDrawCall = SceneManager::MainScene().CreateDrawCall();
+	/*UIDrawCall = SceneManager::MainScene().CreateDrawCall();
 	UIDrawCall->sort = DrawCall::Sorting::AtStartup;
 	UIDrawCall->type = DrawCall::Type::UI;
 	UIDrawCall->objectClassName = "UI Draw Call";
 	UIDrawCall->Close();
 
 	ImGUIElement* newGUIML = GUIML::NewGUIML("", "");
-	RendererCore::AddImGUIElement(*newGUIML, UIDrawCall->Target());
+	RendererCore::AddImGUIElement(*newGUIML, UIDrawCall->Target());*/
 
 	Empty* GDLoader = new Empty();
 	GDLoader->AddScript<GDLevelLoader>();
