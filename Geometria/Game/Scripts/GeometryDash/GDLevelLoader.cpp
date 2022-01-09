@@ -21,49 +21,13 @@ void GDLevelLoader::OnStart()
 
 	std::string urlResult = response.body;*/
 
-	std::string content = Files::Read("Game/Textures/Blocks.zip", true);
+	/*std::string content = Files::Read("Game/Textures/Blocks.zip", true);
 	content = Encryption::LZMA::Compress(content);
-	Files::Write("Game/Textures/Blocks.retropkg", content);
+	Files::Write("Game/Textures/Blocks.retropkg", content);*/
 
 	//std::cout << Files::GetDirectoryOf("Game/Textures/Blocks/blocks.gtxp") << std::endl;
 
-	GDTextures = TextureManager::OpenTexturePack("Game/Textures/Blocks/blocks.gtxp");
-
-	//TextureManager::OpenSpriteSheet("Game/Textures/Blocks/GJ_GameSheet.plist");
-
-	// Stereo Madness: 1556066
-	// How by Spu7nix: 63395980
-	// Future Funk by JonathanGD: 44062068
-
-	std::string urlResult = Web::Post("http://www.boomlings.com/database/downloadGJLevel22.php", "gameVersion=20&binaryVersion=35&gdw=0&levelID=1556066&secret=Wmfd2893gb7");
-
-	std::string levelSubstring = StringAPI::GetSubstringBetween(urlResult, ":4:", ":5:");
-
-	if (!StringAPI::StartsWith(levelSubstring, "kS"))
-	{
-		if (!StringAPI::StartsWith(levelSubstring, "-1") || levelSubstring != "")
-		{
-			//std::cout << levelSubstring << std::endl;
-			std::string decodeBase64 = Encryption::Base64::Decode(levelSubstring, true);
-			std::string decodeZLib = Encryption::ZLib::Inflate(decodeBase64, Encryption::ZLib::Format::GZIP);
-
-			if (decodeZLib == "")
-			{
-				// This means the level is old, decode in ZLIB instead.
-				decodeZLib = Encryption::ZLib::Inflate(decodeBase64, Encryption::ZLib::Format::ZLIB);
-			}
-
-			ReadLevel(decodeZLib);
-		}
-		else
-		{
-			std::cout << "Returned -1" << std::endl;
-		}
-	}
-	else
-	{
-		ReadLevel(levelSubstring);
-	}
+	LoadVerifier();
 }
 
 void GDLevelLoader::ReadLevel(std::string rawData)
@@ -260,4 +224,62 @@ void GDLevelLoader::AddNoCollisions(int id)
 void GDLevelLoader::AddCustomCollisionSize(int id, Vector3 size)
 {
 	customCollisionSize.push_back(std::make_pair(id, size));
+}
+
+void GDLevelLoader::LoadVerifier()
+{
+	if (!Files::DirectoryExists("Game/Textures/Blocks"))
+	{
+		DrawCall* VerifyUI = SceneManager().MainScene().CreateDrawCall();
+		VerifyUI->sort = DrawCall::Sorting::AtStartup;
+		VerifyUI->type = DrawCall::Type::UI;
+		VerifyUI->Close();
+
+		ImGUIElement* win = GUIML::NewGUIML("Game/UI/FirstTime.guiml", "Game/UI/FirstTime.css");
+
+		TextureManager::UploadToGPU();
+
+		RendererCore::AddImGUIElement(*win, VerifyUI->Target());
+	}
+}
+
+void GDLevelLoader::SetupScene()
+{
+	GDTextures = TextureManager::OpenTexturePack("Game/Textures/Blocks/blocks.gtxp");
+
+	//TextureManager::OpenSpriteSheet("Game/Textures/Blocks/GJ_GameSheet.plist");
+
+	// Stereo Madness: 1556066
+	// How by Spu7nix: 63395980
+	// Future Funk by JonathanGD: 44062068
+
+	std::string urlResult = Web::Post("http://www.boomlings.com/database/downloadGJLevel22.php", "gameVersion=20&binaryVersion=35&gdw=0&levelID=1556066&secret=Wmfd2893gb7");
+
+	std::string levelSubstring = StringAPI::GetSubstringBetween(urlResult, ":4:", ":5:");
+
+	if (!StringAPI::StartsWith(levelSubstring, "kS"))
+	{
+		if (!StringAPI::StartsWith(levelSubstring, "-1") || levelSubstring != "")
+		{
+			//std::cout << levelSubstring << std::endl;
+			std::string decodeBase64 = Encryption::Base64::Decode(levelSubstring, true);
+			std::string decodeZLib = Encryption::ZLib::Inflate(decodeBase64, Encryption::ZLib::Format::GZIP);
+
+			if (decodeZLib == "")
+			{
+				// This means the level is old, decode in ZLIB instead.
+				decodeZLib = Encryption::ZLib::Inflate(decodeBase64, Encryption::ZLib::Format::ZLIB);
+			}
+
+			ReadLevel(decodeZLib);
+		}
+		else
+		{
+			std::cout << "Returned -1" << std::endl;
+		}
+	}
+	else
+	{
+		ReadLevel(levelSubstring);
+	}
 }

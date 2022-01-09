@@ -163,6 +163,8 @@ void TextureGroup::UploadToGPU()
 			imageData.clear();
 			std::vector<unsigned char>().swap(imageData);
 		}
+
+		allTextures[i]->isLoadedToGPU = true;
 		//std::cout << std::endl;
 	}
 

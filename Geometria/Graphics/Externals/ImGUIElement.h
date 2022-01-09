@@ -9,7 +9,25 @@
 #include "../../ImGUI/imgui_internal.h"
 #include "../../ImGUI/ImGuizmo.h"
 
+#include "Graphics/Cores/Texture/Texture.h"
+
 #include <functional>
+
+struct ImGUIEFont
+{
+	std::string url, name;
+	int size;
+	ImFont* font = nullptr;
+
+	ImGUIEFont(const char* name, const char* url, int size)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		font = io.Fonts->AddFontFromFileTTF(url, size);
+		this->name = name;
+		this->url = url;
+		this->size = size;
+	}
+};
 
 class ImGUIElement : public ScriptBehaviour
 {
@@ -87,6 +105,13 @@ public:
 
 	std::vector<ImGUIElement*> allElements {};
 
+	static std::vector<ImGUIEFont*> allFonts;
+
+	static ImGUIEFont* AddFont(const char* name, const char* url, int size);
+	static ImGUIEFont* GetFont(const char* nameOrUrl, int size);
+
+	ImGUIEFont* font = nullptr;
+
 	enum GUIType
 	{
 		None,
@@ -112,7 +137,8 @@ public:
 		FileSearch,
 		Guizmo,
 		DragInt,
-		AppWindow
+		AppWindow,
+		Image
 	};
 
 	GUIType guiType = GUIType::None;
@@ -133,16 +159,17 @@ public:
 	
 	void Move(Vector2 position);
 	void Scale(Vector2 scale);
+	void ScaleWithScreenResolution(Vector2 percentageScale);
 
 	bool _requestForceMove = false, _requestForceScale = false;
 
-	std::string text = "", secondText = "", textFinal = "", storedPath = "";
+	std::string text, secondText, textFinal, storedPath;
 	bool deleteMyself = false;
 
 	static bool IsMouseOnAnyWindow();
 	static bool _isMouseOnAnyWindow;
 
-	Vector2 size;
+	Vector2 size, screenSize = Vector2(-1, -1);
 
 	struct
 	{
@@ -152,20 +179,9 @@ public:
 
 	} ColumnProperties;
 
-	struct
-	{
-		std::string font = "Editor/EditorResources/Fonts/Raleway-Regular.ttf";
-		int fontSize = 30;
-		bool refresh = true;
-	} StyleOptions;
-
-	void RefreshStyle()
-	{
-		StyleOptions.refresh = true;
-	}
-
 	enum AlignTo
 	{
+		Nothing,
 		Right,
 		Center,
 		Left,
@@ -174,11 +190,10 @@ public:
 		TopLeft,
 		TopRight,
 		BottomLeft,
-		BottomRight,
-		Nothing
+		BottomRight
 	};
 
-	AlignTo Alignment = AlignTo::Right;
+	AlignTo Alignment = AlignTo::Nothing;
 	AlignTo ScreenPivot = AlignTo::Nothing;
 
 	void OpenWithMouseButton(int input);
@@ -193,11 +208,50 @@ public:
 	bool clicked = false;
 	std::string UITag;
 
+	Color fontColor = Color(-1, -1, -1, -1);
+	int fontSize = 20;
+
+	bool wrapped = false;
+
+	enum ItemPosition
+	{
+		Relative,
+		Absolute
+	};
+
+	ItemPosition itemPos = Relative;
+
+	void SetColor(Color col);
+	void SetFontColor(Color col);
+
+	float borderSize = 1.0f;
+	float borderRadius = 0;
+
+	Vector2 minScale = Vector2(-1, -1), maxScale = Vector2(-1, -1);
+
+	void SetMinScale(Vector2 min);
+	void SetMaxScale(Vector2 max);
+
+	std::string strData;
+
+	Vector2 padding = Vector2(10, 10);
+
+	Texture* backgroundImage = nullptr;
+
 	bool EnableTitle = true;
 	bool EnableScrolling = true;
 	bool EnableResize = true;
 	bool CanBeMoved = true;
 	bool SaveInFile = true;
+
+	bool containsWindowsInside = false;
+
+	std::vector<std::pair<Color, float>> backgroundGradients;
+
+	void AddBackgroundGradient(std::vector<std::pair<Color, float>> bg);
+	void RemoveBackgroundGradient();
+
+	void RenderGradients(std::vector<std::pair<Color, float>>& b, ImVec2 topL, ImVec2 botR);
 
 	std::vector<std::function<void()>> onClickEvents {};
 

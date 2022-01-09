@@ -5,8 +5,8 @@
 #include "../Graphics/Externals/SceneAndDrawCall.h"
 
 //SCENES
-#include "../Game/SampleScene.tits.h"
-#include "../Game/RFPLevelScene.h"
+//#include "../Game/SampleScene.tits.h"
+#include "../Game/GameMain.h"
 
 #include "../Editor/Editor.h"
 #include "../Graphics/Cores/Texture/Texture.h"
@@ -74,7 +74,5 @@ void Application::Start()
 	RendererCore::Start();
 
 	//Application::SetGame();
-	RFPLevelScene::Init();
-
-	//Editor::Begin();
+	GameMain::Init();
 }

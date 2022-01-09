@@ -1,0 +1,40 @@
+@font-face
+{
+	font-family: "Raleway";
+	src: "Editor/EditorResources/Fonts/Raleway-ExtraBold.ttf";
+}
+
+.Main
+{
+	width: 50vw;
+	height: 80vh;
+	min-width: 500px;
+	min-height: 500px;
+	background-color: linear-gradient(rgb(65, 88, 208) 0%, rgb(200, 80, 192) 46%, rgb(255, 204, 112) 100%);
+	padding-x: 0px;
+	border-width: 0px;
+	border-radius: 30px;
+	enable-title: true;
+	enable-resize: true;
+}
+
+.Center
+{
+	width: 400px;
+	height: 400px;
+	align: center;
+	enable-title: true;
+	enable-resize: true;
+	padding-x: 0px;
+	border-width: 0px;
+	background-color: linear-gradient(rgb(133, 255, 189) 0%, rgb(255, 251, 125) 100%);
+	border-radius: 30px;
+}
+
+.center-bold
+{
+	font-family: "Raleway";
+	font-size: 50px;
+	align: center;
+	color: rgb(0, 0, 0);
+}

@@ -6,10 +6,42 @@
 #include "../../Input/Input.h"
 
 bool ImGUIElement::_isMouseOnAnyWindow = false;
+std::vector<ImGUIEFont*> ImGUIElement::allFonts;
 
 void ImGUIElement::LoadElements()
 {
 	
+}
+
+ImGUIEFont* ImGUIElement::AddFont(const char* name, const char* url, int size)
+{
+	ImGUIEFont* font = new ImGUIEFont(name, url, size);
+	allFonts.push_back(font);
+	return font;
+}
+
+ImGUIEFont* ImGUIElement::GetFont(const char* nameOrUrl, int size)
+{
+	bool isUrl = false;
+	std::string nu = nameOrUrl;
+	if (nu.find("/") != std::string::npos)
+		isUrl = true;
+
+	for (auto i : allFonts)
+	{
+		if (isUrl)
+		{
+			if (i->size == size && i->url == nu)
+				return i;
+		}
+		else
+		{
+			if (i->size == size && i->name == nu)
+				return i;
+		}
+	}
+
+	return nullptr;
 }
 
 void ImGUIElement::Move(Vector2 position)
@@ -21,7 +53,46 @@ void ImGUIElement::Move(Vector2 position)
 void ImGUIElement::Scale(Vector2 scale)
 {
 	scaleTo = scale;
+	size = scale;
 	_requestForceScale = true;
+}
+
+void ImGUIElement::ScaleWithScreenResolution(Vector2 percentageScale)
+{
+	screenSize = percentageScale;
+	int finalW = 0, finalH = 0;
+
+	if (screenSize.x == -1)
+		finalW = size.x;
+	else
+		finalW = Graphics::GetMainWindow().width * (screenSize.x / 100.0f);
+
+	if (minScale.x != -1)
+		if (finalW < minScale.x)
+			finalW = minScale.x;
+
+	if (maxScale.x != -1)
+		if (finalW > maxScale.x)
+			finalW = maxScale.x;
+
+
+	if (screenSize.y == -1)
+	{
+		finalH = size.y;
+	}
+	else
+		finalH = Graphics::GetMainWindow().height * (screenSize.y / 100.0f);
+
+	if (minScale.y != -1)
+		if (finalH < minScale.y)
+			finalH = minScale.y;
+
+	if (maxScale.y != -1)
+		if (finalH > maxScale.y)
+			finalH = maxScale.y;
+
+
+	Scale(Vector2(finalW, finalH));
 }
 
 bool ImGUIElement::IsMouseOnAnyWindow()
@@ -32,6 +103,128 @@ bool ImGUIElement::IsMouseOnAnyWindow()
 void ImGUIElement::OpenWithMouseButton(int input)
 {
 	mouseInput = input;
+}
+
+void ImGUIElement::SetColor(Color col)
+{
+	isColored = true;
+	colorRef = new Color(col);
+}
+
+void ImGUIElement::SetFontColor(Color col)
+{
+	isColored = true;
+
+	if (guiType == GUIType::Window)
+		fontColor = col;
+	else
+		colorRef = new Color(col);
+}
+
+void ImGUIElement::SetMinScale(Vector2 min)
+{
+	minScale = min;
+}
+
+void ImGUIElement::SetMaxScale(Vector2 max)
+{
+	maxScale = max;
+}
+
+void ImGUIElement::AddBackgroundGradient(std::vector<std::pair<Color, float>> bg)
+{
+	RemoveBackgroundGradient();
+	backgroundGradients = bg;
+}
+
+void ImGUIElement::RemoveBackgroundGradient()
+{
+	backgroundGradients.clear();
+	std::vector<std::pair<Color, float>>().swap(backgroundGradients);
+}
+
+void ShadeVertsLinearColorGradientSetAlpha(ImDrawList* draw_list, int vert_start_idx, int vert_end_idx, ImVec2 gradient_p0, ImVec2 gradient_p1, ImU32 col0, ImU32 col1)
+{
+    ImVec2 gradient_extent = ImVec2(gradient_p1.x - gradient_p0.x, gradient_p1.y - gradient_p0.y);
+    float gradient_inv_length2 = 1.0f / ImLengthSqr(gradient_extent);
+    ImDrawVert* vert_start = draw_list->VtxBuffer.Data + vert_start_idx;
+    ImDrawVert* vert_end = draw_list->VtxBuffer.Data + vert_end_idx;
+    const int col0_r = (int)(col0 >> IM_COL32_R_SHIFT) & 0xFF;
+    const int col0_g = (int)(col0 >> IM_COL32_G_SHIFT) & 0xFF;
+    const int col0_b = (int)(col0 >> IM_COL32_B_SHIFT) & 0xFF;
+    const int col0_a = (int)(col0 >> IM_COL32_A_SHIFT) & 0xFF;
+    const int col_delta_r = ((int)(col1 >> IM_COL32_R_SHIFT) & 0xFF) - col0_r;
+    const int col_delta_g = ((int)(col1 >> IM_COL32_G_SHIFT) & 0xFF) - col0_g;
+    const int col_delta_b = ((int)(col1 >> IM_COL32_B_SHIFT) & 0xFF) - col0_b;
+    const int col_delta_a = ((int)(col1 >> IM_COL32_A_SHIFT) & 0xFF) - col0_a;
+    for (ImDrawVert* vert = vert_start; vert < vert_end; vert++)
+    {
+        float d = ImDot(ImVec2(vert->pos.x - gradient_p0.x, vert->pos.y - gradient_p0.y), gradient_extent);
+        float t = ImClamp(d * gradient_inv_length2, 0.0f, 1.0f);
+        int r = (int)(col0_r + col_delta_r * t);
+        int g = (int)(col0_g + col_delta_g * t);
+        int b = (int)(col0_b + col_delta_b * t);
+        int a = (int)(col0_a + col_delta_a * t);
+        vert->col = (r << IM_COL32_R_SHIFT) | (g << IM_COL32_G_SHIFT) | (b << IM_COL32_B_SHIFT) | (a << IM_COL32_A_SHIFT);
+    }
+}
+
+void ImGUIElement::RenderGradients(std::vector<std::pair<Color, float>>& b, ImVec2 topL, ImVec2 botR)
+{
+	std::vector<std::pair<Color, float>> finalB;
+
+	if (b[0].second != 0)
+		finalB.push_back(std::make_pair(b[0].first, 0));
+
+	for (auto i : b)
+		finalB.push_back(i);
+
+	if(b[b.size() - 1].second != 100)
+		finalB.push_back(std::make_pair(b[b.size() - 1].first, 100));
+
+	for (int i = 1; i < finalB.size(); i++)
+	{
+		ImVec2 topLFinal = topL, botRFinal = botR;
+
+		topLFinal.y = (ImGui::GetWindowSize().y * finalB[i - 1].second / 100) + topL.y;
+		botRFinal.y = (ImGui::GetWindowSize().y * finalB[i].second / 100) + topL.y;
+
+		/*std::cout << "Top Left: " << topLFinal.x << " x " << topLFinal.y << " || Percentage: " << finalB[i - 1].second << '\n';
+		std::cout << "Bottom Right: " << botRFinal.x << " x " << botRFinal.y << " || Percentage: " << finalB[i].second << '\n';
+		std::cout << "--------------------------------" << '\n';*/
+
+		ImColor col2(finalB[i].first.r, finalB[i].first.g, finalB[i].first.b, finalB[i].first.a);
+		ImColor col1(finalB[i - 1].first.r, finalB[i - 1].first.g, finalB[i - 1].first.b, finalB[i - 1].first.a);
+
+		/*ImGui::GetWindowDrawList()->AddRectFilledMultiColor(topLFinal, botRFinal,
+			col1, col1, col2, col2);*/
+
+		float finalBorderRadius = 0;
+		ImDrawFlags flags;
+		if (i == 1)
+		{
+			if (finalB.size() == 2)
+				flags = ImDrawCornerFlags_All;
+			else
+				flags = ImDrawCornerFlags_Top;
+
+			finalBorderRadius = borderRadius;
+		}
+		else if (i == finalB.size() - 1)
+		{
+			flags = ImDrawCornerFlags_Bot;
+			finalBorderRadius = borderRadius;
+		}
+
+		const int vtx_idx_0 = ImGui::GetWindowDrawList()->VtxBuffer.Size;
+		ImGui::GetWindowDrawList()->AddRectFilled(topLFinal, botRFinal, ImColor(1, 1, 1, 1), finalBorderRadius, flags);
+		const int vtx_idx_1 = ImGui::GetWindowDrawList()->VtxBuffer.Size;
+		ImGui::GetWindowDrawList()->AddRectFilled(topLFinal, botRFinal, ImColor(1, 1, 1, 1), finalBorderRadius, flags);
+		const int vtx_idx_2 = ImGui::GetWindowDrawList()->VtxBuffer.Size;
+
+		ShadeVertsLinearColorGradientSetAlpha(ImGui::GetWindowDrawList(), vtx_idx_0, vtx_idx_1, topLFinal, ImVec2(botRFinal.x, topLFinal.y), col1, col2);
+		ShadeVertsLinearColorGradientSetAlpha(ImGui::GetWindowDrawList(), vtx_idx_1, vtx_idx_2, topLFinal, ImVec2(topLFinal.x, botRFinal.y), col1, col2);
+	}
 }
 
 void ImGUIElement::Delete()
@@ -151,25 +344,67 @@ void ImGUIElement::OnUpdate()
 			onUIUpdateBeginEvents[i]();
 		}
 
-		switch (Alignment)
+
+		bool currentWrapping = false;
+		if (owner != nullptr)
 		{
-		case Center:
-			float font_size = ImGui::GetFontSize() * text.size() / 2;
-			ImGui::NewLine();
-			ImGui::SameLine
-			(
-				ImGui::GetWindowSize().x / 2 -
-				font_size + (font_size / 2)
-			);
+			if (owner->wrapped)
+				currentWrapping = true;
+			else
+				currentWrapping = wrapped;
+		}
+		else
+		{
+			currentWrapping = wrapped;
+		}
+
+		if (guiType != GUIType::Window)
+		{
+			switch (Alignment)
+			{
+			case Center:
+				float font_size = (ImGui::GetFontSize() * text.size()) / 1.55f;
+				float text_indentation = (ImGui::GetWindowSize().x / 2.f) - font_size;
+				float min_indentation = 20.0f;
+				if (text_indentation <= min_indentation) {
+					text_indentation = min_indentation;
+				}
+				ImGui::NewLine();
+				ImGui::SameLine(text_indentation);
+
+				if (currentWrapping)
+					ImGui::PushTextWrapPos(ImGui::GetWindowSize().x - text_indentation);
+				break;
+			}
 		}
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImColor styleCol = style.Colors[ImGuiCol_Text];
+		ImColor windowBgCol = style.Colors[ImGuiCol_WindowBg];
+		ImVec2 padding = style.WindowPadding;
 
-		if (isColored)
+		float winBorderSize = style.WindowBorderSize;
+		float childWinBorderSize = style.ChildBorderSize;
+
+		style.WindowBorderSize = borderSize;
+		style.ChildBorderSize = borderSize;
+
+		float winBorderRadius = style.WindowRounding,
+			childWinBorderRadius = style.ChildRounding,
+			frameBorderRadius = style.FrameRounding;
+
+		style.WindowRounding = borderRadius;
+		style.ChildRounding = borderRadius;
+		style.FrameRounding = borderRadius;
+
+		style.WindowPadding = ImVec2(this->padding.x, this->padding.y);
+
+		if (isColored && guiType != GUIType::Window)
 		{
-			if(colorRef != nullptr)
+			if (colorRef != nullptr)
+			{
 				style.Colors[ImGuiCol_Text] = ImColor(colorRef->r, colorRef->g, colorRef->b, colorRef->a);
+			}
 		}
 
 		if (UITag == "")
@@ -177,17 +412,75 @@ void ImGUIElement::OnUpdate()
 		else
 			textFinal = text + "###" + UITag;
 
+		if (font != nullptr)
+		{
+			ImGui::PushFont(font->font);
+		}
+
 		ImGuiWindowFlags window_flags = 0;
 
+		float alignW = 0, alignH = 0;
 		switch (guiType)
 		{
 		case GUIType::Window:
+			if (screenSize.x != -1 || screenSize.y != -1)
+				ScaleWithScreenResolution(screenSize);
+
+			if (isColored)
+			{
+				if (backgroundImage == nullptr)
+				{
+					if (colorRef != nullptr)
+					{
+						style.Colors[ImGuiCol_WindowBg] = ImColor(colorRef->r, colorRef->g, colorRef->b, colorRef->a);
+					}
+				}
+
+				if (fontColor != Color(-1, -1, -1, -1))
+				{
+					style.Colors[ImGuiCol_Text] = ImColor(fontColor.r, fontColor.g, fontColor.b, fontColor.a);
+				}
+			}
+
+			if (backgroundImage != nullptr || backgroundGradients.size() != 0)
+				style.Colors[ImGuiCol_WindowBg] = ImColor(0, 0, 0, 0);
+
+			if (owner != nullptr)
+			{
+				alignW = ImGui::GetWindowPos().x + ImGui::GetWindowSize().x / 2;
+				alignH = ImGui::GetWindowPos().y + ImGui::GetWindowSize().y / 2;
+			}
+			else
+			{
+				alignW = Graphics::GetMainWindow().width / 2.f;
+				alignH = Graphics::GetMainWindow().height / 2.f;
+			}
+
+			switch (Alignment)
+			{
+			case TopLeft:
+				Move(Vector2(0, 0));
+				break;
+			case Top:
+				Move(Vector2(alignW - size.x + (size.x / 2), 0));
+				break;
+			case Left:
+				Move(Vector2(0, alignH - size.y + (size.y / 2)));
+				break;
+			case Center:
+				Move(Vector2(
+					alignW - size.x + (size.x / 2),
+					alignH - size.y + (size.y / 2)));
+				break;
+			}
+
 			bool window;
 
 			if (!EnableResize) window_flags |= ImGuiWindowFlags_NoResize;
 			if (!EnableTitle) window_flags |= ImGuiWindowFlags_NoTitleBar;
 			if (!EnableScrolling) window_flags |= ImGuiWindowFlags_NoScrollbar;
 			if (!CanBeMoved) window_flags |= ImGuiWindowFlags_NoMove;
+			if (containsWindowsInside) { window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus; containsWindowsInside = false; }
 
 			if (!SaveInFile)
 				ImGui::GetIO().IniFilename = NULL;
@@ -205,18 +498,39 @@ void ImGUIElement::OnUpdate()
 
 				if (_requestForceMove)
 				{
-					ImGui::SetNextWindowPos(ImVec2(moveToPosition.x, moveToPosition.y), ImGuiCond_Once);
+					ImGui::SetNextWindowPos(ImVec2(moveToPosition.x, moveToPosition.y), ImGuiCond_Always);
+					_requestForceMove = false;
 				}
 
 				if (_requestForceScale)
 				{
-					ImGui::SetNextWindowSize(ImVec2(scaleTo.x, scaleTo.y), ImGuiCond_Once);
+					ImGui::SetNextWindowSize(ImVec2(scaleTo.x, scaleTo.y), ImGuiCond_Always);
+					_requestForceScale = false;
 				}
 
-				if (!enableOpenAndClose)
-					window = ImGui::Begin(textFinal.c_str(), nullptr, window_flags);
+				bool isAbsolute = owner != nullptr && itemPos == ItemPosition::Absolute;
+
+				if (owner == nullptr || isAbsolute)
+				{
+					if (isAbsolute)
+					{
+						owner->containsWindowsInside = true;
+					}
+
+					if (!enableOpenAndClose)
+					{
+						window = ImGui::Begin(textFinal.c_str(), nullptr, window_flags);
+					}
+					else
+					{
+						window = ImGui::Begin(textFinal.c_str(), &isOpen, window_flags);
+					}
+				}
 				else
-					window = ImGui::Begin(textFinal.c_str(), &isOpen, window_flags);
+				{
+					window = ImGui::BeginChild(textFinal.c_str(), ImVec2(size.x, size.y), true);
+					owner->containsWindowsInside = true;
+				}
 
 				ImGUIElement::_isMouseOnAnyWindow = false;
 
@@ -225,27 +539,51 @@ void ImGUIElement::OnUpdate()
 					if (ImGui::IsWindowHovered())
 						ImGUIElement::_isMouseOnAnyWindow = true;
 
+					ImVec2 window_TopLeft(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
+					ImVec2 window_BottomRight(ImGui::GetWindowPos().x + ImGui::GetWindowSize().x, ImGui::GetWindowPos().y + ImGui::GetWindowSize().y);
+
+					if (owner != nullptr && colorRef != nullptr)
+					{
+						ImGui::GetWindowDrawList()->AddRectFilled(window_TopLeft, window_BottomRight, ImColor(style.Colors[ImGuiCol_WindowBg]), borderRadius);
+					}
+
+					if (backgroundGradients.size() != 0)
+					{
+						ImGUIElement::RenderGradients(backgroundGradients, window_TopLeft, window_BottomRight);
+					}
+
+					if (backgroundImage != nullptr)
+					{
+						if (backgroundImage->IsLoadedToGPU())
+						{
+							ImVec2 winPad = style.WindowPadding;
+
+							ImVec2 uvMin(float(backgroundImage->finalRect.x) / float(TextureManager::textureGroups[backgroundImage->texGroupId].width),
+								float(backgroundImage->finalRect.y) / float(TextureManager::textureGroups[backgroundImage->texGroupId].height));
+
+							ImVec2 uvMax(float(backgroundImage->finalRect.x + backgroundImage->finalRect.width) / float(TextureManager::textureGroups[backgroundImage->texGroupId].width),
+								float(backgroundImage->finalRect.y + backgroundImage->finalRect.height) / float(TextureManager::textureGroups[backgroundImage->texGroupId].height));
+
+							ImGui::GetWindowDrawList()->AddImage((void*)(intptr_t)TextureManager::textureGroups[backgroundImage->texGroupId].texture,
+								window_TopLeft,
+								window_BottomRight, uvMin, uvMax);
+						}
+					}
+
 					for (int i = 0; i < allElements.size(); i++)
 					{
 						allElements[i]->OnUpdate();
 					}
+				}
 
-					if (_requestForceMove)
-					{
-						if (ImGui::GetWindowPos().x == moveToPosition.x && ImGui::GetWindowPos().y == moveToPosition.y)
-						{
-							std::cout << "Window In Correct Place!" << std::endl;
-							_requestForceMove = false;
-						}
-					}
-
-					if (_requestForceScale)
-					{
-						if (ImGui::GetWindowSize().x == scaleTo.x && ImGui::GetWindowSize().y == scaleTo.y)
-							_requestForceScale = false;
-					}
-
+				if (owner == nullptr)
 					ImGui::End();
+				else
+					ImGui::EndChild();
+
+				if (isAbsolute)
+				{
+					ImGui::SetCursorScreenPos(ImVec2(ImGui::GetWindowPos().x + padding.x, ImGui::GetWindowPos().y + ImGui::GetFontSize() + padding.y));
 				}
 			}
 			else
@@ -372,7 +710,14 @@ void ImGUIElement::OnUpdate()
 			break;
 
 		case GUIType::Text:
-			ImGui::Text(textFinal.c_str());
+			if (!currentWrapping)
+				ImGui::Text(textFinal.c_str());
+			else
+			{
+				ImGui::TextWrapped(textFinal.c_str());
+				if(Alignment == AlignTo::Center)
+					ImGui::PopTextWrapPos();
+			}
 			break;
 
 		case GUIType::ColorEditorButtonRGBA:
@@ -415,15 +760,6 @@ void ImGUIElement::OnUpdate()
 
 		case GUIType::ImGUIDemoWindow:
 			ImGui::ShowDemoWindow();
-			break;
-
-		case GUIType::Style:
-			if (StyleOptions.refresh)
-			{
-				ImGuiIO& io = ImGui::GetIO();
-				io.Fonts->AddFontFromFileTTF(ImGUIElement::StyleOptions.font.c_str(), ImGUIElement::StyleOptions.fontSize);
-				StyleOptions.refresh = false;
-			}
 			break;
 
 		case GUIType::SliderFloat:
@@ -494,10 +830,21 @@ void ImGUIElement::OnUpdate()
 			}
 		}
 
-		if (isColored)
+		if (font != nullptr)
 		{
-			style.Colors[ImGuiCol_Text] = styleCol;
+			ImGui::PopFont();
 		}
+
+		style.Colors[ImGuiCol_Text] = styleCol;
+		style.Colors[ImGuiCol_WindowBg] = windowBgCol;
+
+		style.WindowPadding = padding;
+		style.WindowBorderSize = winBorderSize;
+		style.ChildBorderSize = childWinBorderSize;
+
+		style.WindowRounding = winBorderRadius;
+		style.ChildRounding = childWinBorderRadius;
+		style.FrameRounding = frameBorderRadius;
 
 		for (int i = 0; i < onUIUpdateEndEvents.size(); i++)
 		{

@@ -35,6 +35,25 @@ std::string Files::Read(const char* url, bool isBinary)
     return content;
 }
 
+std::vector<std::string> Files::ReadAndGetLines(const char* url)
+{
+    std::vector<std::string> allLines;
+
+    std::ifstream file(url);
+    if (file.is_open())
+    {
+        std::string line;
+        while (std::getline(file, line))
+        {
+            allLines.push_back(line);
+        }
+    }
+
+    file.close();
+
+    return allLines;
+}
+
 std::string Files::Write(const char* url, std::string content)
 {
     std::ofstream file(url);
@@ -153,6 +172,12 @@ bool Files::LoadScene(std::string file)
 void Files::CreateDirectory(const char* url)
 {
     std::experimental::filesystem::create_directories(url);
+}
+
+bool Files::DirectoryExists(const char* url)
+{
+    std::experimental::filesystem::path urlPath(url);
+    return std::experimental::filesystem::exists(urlPath);
 }
 
 int Files::UnZIP(const char* zipUrl)

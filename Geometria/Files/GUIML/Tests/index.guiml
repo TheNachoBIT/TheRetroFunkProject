@@ -1,5 +1,6 @@
-<guiml name="Begin">
-	<p>Hi i love this thing! </p>
-	<cont></cont>
-	<p>I can code like in HTML!</p>
+<guiml type="Window" name="Begin" class="Window">
+	<div class="smallWindow">
+		<div class="VeryGood" />
+	</div>
+	<p class="blackText">graphic design is my passion</p>
 </guiml>

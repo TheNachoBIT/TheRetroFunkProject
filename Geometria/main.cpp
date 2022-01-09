@@ -168,35 +168,6 @@ int main(int argc, char** argv)
             else if (!Input::GetKey(GLFW_KEY_C) && speed == 30)
                 speed = 4;
 
-            if (Input::GetKeyDown(GLFW_KEY_TAB))
-                stopCamera = !stopCamera;
-
-            if (Input::GetKeyDown(GLFW_KEY_X))
-            {
-                firstPerson = !firstPerson;
-
-                if (firstPerson)
-                    glfwSetInputMode(Graphics::GetMainWindow().openGLWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                else
-                    glfwSetInputMode(Graphics::GetMainWindow().openGLWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            }
-
-            if (Input::GetKeyDown(GLFW_KEY_P))
-            {
-                switch (Application::_engineState)
-                {
-                case Application::State::Game:
-                    Application::SetEditor();
-                    std::cout << "State: Editing..." << std::endl;
-                    break;
-
-                case Application::State::Editor:
-                    Application::SetGame();
-                    std::cout << "State: Gaming..." << std::endl;
-                    break;
-                }
-            }
-
             if (!stopCamera)
             {
                 if (Input::GetKey(GLFW_KEY_S))
@@ -211,18 +182,6 @@ int main(int argc, char** argv)
                     Graphics::MainCamera()->editorPosition -= Graphics::MainCamera()->up * speed * Graphics::DeltaTime();
                 if (Input::GetKey(GLFW_KEY_Q))
                     Graphics::MainCamera()->editorPosition += Graphics::MainCamera()->up * speed * Graphics::DeltaTime();
-
-                if (Input::GetKeyDown(GLFW_KEY_Y))
-                {
-                    if (!Graphics::MainCamera()->editorModeCamera)
-                    {
-                        Editor::SwitchEditorView();
-                    }
-                    else
-                    {
-                        Editor::SwitchGameView();
-                    }
-                }
             }
         }
 
@@ -238,6 +197,47 @@ int main(int argc, char** argv)
             {
                 if (Input::GetKey(GLFW_KEY_LEFT_ALT))
                 {
+                    if (Input::GetKeyDown(GLFW_KEY_TAB))
+                        stopCamera = !stopCamera;
+
+                    if (Input::GetKeyDown(GLFW_KEY_X))
+                    {
+                        firstPerson = !firstPerson;
+
+                        if (firstPerson)
+                            glfwSetInputMode(Graphics::GetMainWindow().openGLWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                        else
+                            glfwSetInputMode(Graphics::GetMainWindow().openGLWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                    }
+
+                    if (Input::GetKeyDown(GLFW_KEY_P))
+                    {
+                        switch (Application::_engineState)
+                        {
+                        case Application::State::Game:
+                            Application::SetEditor();
+                            std::cout << "State: Editing..." << std::endl;
+                            break;
+
+                        case Application::State::Editor:
+                            Application::SetGame();
+                            std::cout << "State: Gaming..." << std::endl;
+                            break;
+                        }
+                    }
+
+                    if (Input::GetKeyDown(GLFW_KEY_Y))
+                    {
+                        if (!Graphics::MainCamera()->editorModeCamera)
+                        {
+                            Editor::SwitchEditorView();
+                        }
+                        else
+                        {
+                            Editor::SwitchGameView();
+                        }
+                    }
+
                     if (Input::GetKeyDown(GLFW_KEY_C))
                         CompilationCore::Compile();
 

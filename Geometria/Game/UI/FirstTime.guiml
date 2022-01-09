@@ -1,0 +1,5 @@
+<guiml type="Window" class="Main">
+	<div class="Center">
+		<p class="center-bold">Welcome!</p>
+	</div>
+</guiml>

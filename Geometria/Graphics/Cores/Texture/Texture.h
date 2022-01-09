@@ -2,7 +2,8 @@
 #include <glfw3.h>
 
 #include "MaxReactsBinPack/MaxRectsBinPack.h"
-
+#ifndef TEXTURE_H
+#define TEXTURE_H
 class Texture
 {
 public:
@@ -14,6 +15,7 @@ public:
 	std::vector<unsigned char> data;
 	rbp::Rect finalRect;
 	int texGroupId = 0;
+	bool isLoadedToGPU = false;
 
 	enum Type
 	{
@@ -24,6 +26,7 @@ public:
 	Texture();
 	Texture(const char* fileName, Type type);
 	Texture(std::string fileName, Type type);
+	bool IsLoadedToGPU() { return isLoadedToGPU; }
 	~Texture() {};
 };
 
@@ -110,3 +113,4 @@ public:
 		}
 	}
 };
+#endif

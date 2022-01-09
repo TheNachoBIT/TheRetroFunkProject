@@ -13,6 +13,11 @@ std::string StringAPI::ReplaceAll(std::string str, const std::string& from, cons
 	return modifyString;
 }
 
+std::string StringAPI::RemoveAll(std::string str, const std::string& del)
+{
+	return StringAPI::ReplaceAll(str, del, "");
+}
+
 std::string StringAPI::GetSubstringBetween(std::string text, std::string firstT, std::string lastT)
 {
 	unsigned first = text.find(firstT);

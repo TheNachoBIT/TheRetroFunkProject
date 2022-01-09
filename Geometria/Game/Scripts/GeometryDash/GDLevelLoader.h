@@ -23,4 +23,9 @@ struct GDLevelLoader : public ScriptBehaviour
 	void AddCustomSize(int id, Vector3 size);
 	void AddNoCollisions(int id);
 	void AddCustomCollisionSize(int id, Vector3 size);
+
+	std::string username, password;
+
+	void LoadVerifier();
+	void SetupScene();
 };

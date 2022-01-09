@@ -59,6 +59,8 @@ void Window::ResizeWindow(GLFWwindow* window, int width, int height)
 	//==[ OPENGL ]==//
 	{
 		glfwGetFramebufferSize(window, &Window::width, &Window::height);
+		//std::cout << "Changed Width: " << Window::width << " || Changed Height: " << Window::height << std::endl;
+		//std::cout << "Current Width: " << Graphics::GetMainWindow().width << " || Current Height: " << Graphics::GetMainWindow().height << std::endl;
 		Graphics::MainCamera()->ProjectionMatrix(Graphics::MainCamera()->fov, (float)Window::width / (float)Window::height, Graphics::MainCamera()->nearPlane, Graphics::MainCamera()->farPlane);
 		glViewport(0, 0, width, height);
 	}
