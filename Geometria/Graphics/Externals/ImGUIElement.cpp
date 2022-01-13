@@ -100,6 +100,12 @@ bool ImGUIElement::IsMouseOnAnyWindow()
 	return _isMouseOnAnyWindow;
 }
 
+void ImGUIElement::SetAlignPivot(Vector2 a)
+{
+	Alignment = AlignTo::Custom;
+	alignPivot = a;
+}
+
 void ImGUIElement::OpenWithMouseButton(int input)
 {
 	mouseInput = input;
@@ -225,6 +231,44 @@ void ImGUIElement::RenderGradients(std::vector<std::pair<Color, float>>& b, ImVe
 		ShadeVertsLinearColorGradientSetAlpha(ImGui::GetWindowDrawList(), vtx_idx_0, vtx_idx_1, topLFinal, ImVec2(botRFinal.x, topLFinal.y), col1, col2);
 		ShadeVertsLinearColorGradientSetAlpha(ImGui::GetWindowDrawList(), vtx_idx_1, vtx_idx_2, topLFinal, ImVec2(topLFinal.x, botRFinal.y), col1, col2);
 	}
+}
+
+void ImGUIElement::RenderBoxShadow()
+{
+	Vector2 lastPosPlusOffset = lastPosition + boxShadow->offset;
+	Vector2 lastPosPlusSize = lastPosPlusOffset + lastSize;
+
+	ImDrawList* draw_list = nullptr;
+	if (owner != nullptr)
+		draw_list = ImGui::GetWindowDrawList();
+	else
+		draw_list = ImGui::GetBackgroundDrawList();
+
+	draw_list->AddRectFilled(ImVec2(lastPosPlusOffset.x, lastPosPlusOffset.y),
+		ImVec2(lastPosPlusSize.x, lastPosPlusSize.y),
+		ImColor(boxShadow->col.r, boxShadow->col.g, boxShadow->col.b, boxShadow->col.a),
+		borderRadius);
+}
+
+ImGUIEBoxShadow* ImGUIElement::AddBoxShadow(Color shadowCol, Vector2 offset)
+{
+	if (boxShadow == nullptr)
+		boxShadow = new ImGUIEBoxShadow();
+
+	boxShadow->col = shadowCol;
+	boxShadow->offset = offset;
+
+	return boxShadow;
+}
+
+ImGUIEBoxShadow* ImGUIElement::RemoveBoxShadow()
+{
+	if (boxShadow != nullptr)
+	{
+		delete boxShadow;
+		boxShadow = nullptr;
+	}
+	return nullptr;
 }
 
 void ImGUIElement::Delete()
@@ -363,14 +407,14 @@ void ImGUIElement::OnUpdate()
 			switch (Alignment)
 			{
 			case Center:
-				float font_size = (ImGui::GetFontSize() * text.size()) / 1.55f;
-				float text_indentation = (ImGui::GetWindowSize().x / 2.f) - font_size;
+				float font_size = ImGui::CalcTextSize(text.c_str()).x;
+				float text_indentation = (ImGui::GetWindowSize().x - font_size) * 0.5f;
 				float min_indentation = 20.0f;
 				if (text_indentation <= min_indentation) {
 					text_indentation = min_indentation;
 				}
-				ImGui::NewLine();
-				ImGui::SameLine(text_indentation);
+				
+				ImGui::SetCursorPosX(text_indentation);
 
 				if (currentWrapping)
 					ImGui::PushTextWrapPos(ImGui::GetWindowSize().x - text_indentation);
@@ -419,6 +463,12 @@ void ImGUIElement::OnUpdate()
 
 		ImGuiWindowFlags window_flags = 0;
 
+		if (lastPosition != Vector2(-1, -1) && lastSize != Vector2(-1, -1))
+		{
+			if (boxShadow != nullptr)
+				RenderBoxShadow();
+		}
+
 		float alignW = 0, alignH = 0;
 		switch (guiType)
 		{
@@ -445,33 +495,53 @@ void ImGUIElement::OnUpdate()
 			if (backgroundImage != nullptr || backgroundGradients.size() != 0)
 				style.Colors[ImGuiCol_WindowBg] = ImColor(0, 0, 0, 0);
 
-			if (owner != nullptr)
-			{
-				alignW = ImGui::GetWindowPos().x + ImGui::GetWindowSize().x / 2;
-				alignH = ImGui::GetWindowPos().y + ImGui::GetWindowSize().y / 2;
-			}
-			else
-			{
-				alignW = Graphics::GetMainWindow().width / 2.f;
-				alignH = Graphics::GetMainWindow().height / 2.f;
-			}
-
 			switch (Alignment)
 			{
 			case TopLeft:
-				Move(Vector2(0, 0));
+				alignPivot = Vector2(0, 0);
 				break;
 			case Top:
-				Move(Vector2(alignW - size.x + (size.x / 2), 0));
+				alignPivot = Vector2(0.5, 0);
 				break;
+			case TopRight:
+				alignPivot = Vector2(1, 0);
+
 			case Left:
-				Move(Vector2(0, alignH - size.y + (size.y / 2)));
+				alignPivot = Vector2(0, 0.5);
 				break;
 			case Center:
-				Move(Vector2(
-					alignW - size.x + (size.x / 2),
-					alignH - size.y + (size.y / 2)));
+				alignPivot = Vector2(0.5, 0.5);
 				break;
+			case Right:
+				alignPivot = Vector2(1, 0.5);
+
+			case BottomLeft:
+				alignPivot = Vector2(0, 1);
+				break;
+			case Bottom:
+				alignPivot = Vector2(0.5, 1);
+				break;
+			case BottomRight:
+				alignPivot = Vector2(1, 1);
+			}
+
+			if (owner != nullptr)
+			{
+				alignW = (ImGui::GetWindowPos().x + ((ImGui::GetWindowSize().x - size.x) * alignPivot.x));
+				alignH = (ImGui::GetWindowPos().y + ((ImGui::GetWindowSize().y - size.y) * alignPivot.y));
+			}
+			else
+			{
+				alignW = Graphics::GetMainWindow().width * alignPivot.x - (size.x / 2);
+				alignH = Graphics::GetMainWindow().height * alignPivot.y - (size.y / 2);
+			}
+
+			if (alignPivot != Vector2(-1, -1))
+			{
+				Move(Vector2(
+					alignW,
+					alignH
+				));
 			}
 
 			bool window;
@@ -496,6 +566,8 @@ void ImGUIElement::OnUpdate()
 					_lastOpenState = isOpen;
 				}
 
+				bool isAbsolute = owner != nullptr && itemPos == ItemPosition::Absolute;
+
 				if (_requestForceMove)
 				{
 					ImGui::SetNextWindowPos(ImVec2(moveToPosition.x, moveToPosition.y), ImGuiCond_Always);
@@ -507,8 +579,6 @@ void ImGUIElement::OnUpdate()
 					ImGui::SetNextWindowSize(ImVec2(scaleTo.x, scaleTo.y), ImGuiCond_Always);
 					_requestForceScale = false;
 				}
-
-				bool isAbsolute = owner != nullptr && itemPos == ItemPosition::Absolute;
 
 				if (owner == nullptr || isAbsolute)
 				{
@@ -575,6 +645,9 @@ void ImGUIElement::OnUpdate()
 						allElements[i]->OnUpdate();
 					}
 				}
+
+				lastPosition = Vector2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
+				lastSize = Vector2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
 
 				if (owner == nullptr)
 					ImGui::End();

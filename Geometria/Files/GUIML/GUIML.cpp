@@ -183,6 +183,16 @@ ImGUIElement* GUIML::NewGUIML(std::string url, std::string css)
 				// Window Resize
 				else if (pair.first == "enable-resize")
 					addClass.windowResize = pair.second.Text;
+
+				// [---------------EFFECTS---------------]
+				// Box Shadow
+				else if (pair.first == "box-shadow-color" || pair.first == "box-shadow-colour")
+					addClass.boxShadowColor = RGBToCol(pair.second.Text);
+
+				else if (pair.first == "box-shadow-x")
+					addClass.boxShadowX = pair.second.Text;
+				else if (pair.first == "box-shadow-y")
+					addClass.boxShadowY = pair.second.Text;
 			}
 
 			_currentCSSStyles.push_back(addClass);
@@ -381,6 +391,15 @@ void GUIML::ApplyCSS(ImGUIElement& gui, std::string c)
 
 		if (css.windowResize != "")
 			gui.EnableResize = TextToBool(css.windowResize);
+
+		float bSX = 0, bSY = 0;
+		if (css.boxShadowX != "")
+			bSX = PixelsToFloat(css.boxShadowX);
+		if (css.boxShadowY != "")
+			bSY = PixelsToFloat(css.boxShadowY);
+
+		if (css.boxShadowColor != Color(-1, -1, -1, -1))
+			gui.AddBoxShadow(css.boxShadowColor, Vector2(bSX, bSY));
 	}
 }
 
@@ -461,15 +480,32 @@ void GUIML::CSS_ApplyMaxOrMinResolution(ImGUIElement& gui, std::string var, std:
 
 void GUIML::CSS_ApplyAlignment(ImGUIElement& gui, std::string value)
 {
-	if (value == "top-left")
-		gui.Alignment = ImGUIElement::AlignTo::TopLeft;
-	else if (value == "top")
-		gui.Alignment = ImGUIElement::AlignTo::Top;
+	if (value.find("%") == std::string::npos)
+	{
+		if (value == "top-left")
+			gui.Alignment = ImGUIElement::AlignTo::TopLeft;
+		else if (value == "top")
+			gui.Alignment = ImGUIElement::AlignTo::Top;
 
-	else if (value == "left")
-		gui.Alignment = ImGUIElement::AlignTo::Left;
-	else if (value == "center")
-		gui.Alignment = ImGUIElement::AlignTo::Center;
+		else if (value == "left")
+			gui.Alignment = ImGUIElement::AlignTo::Left;
+		else if (value == "center")
+			gui.Alignment = ImGUIElement::AlignTo::Center;
+	}
+	else
+	{
+		std::vector<std::string> values = StringAPI::SplitIntoVector(value, " ");
+		if (values.size() == 2)
+		{
+			float x = std::stof(StringAPI::RemoveAll(values[0], "%"));
+			x /= 100.0f;
+
+			float y = std::stof(StringAPI::RemoveAll(values[1], "%"));
+			y /= 100.0f;
+
+			gui.SetAlignPivot(Vector2(x, y));
+		}
+	}
 }
 
 void GUIML::CSS_ApplyFont(ImGUIElement& gui, GUIMLCSSFont f)

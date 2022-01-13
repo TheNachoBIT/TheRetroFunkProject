@@ -4,6 +4,8 @@
 #include <sstream>
 #include <vector>
 
+#include "Files/ZIP/unzip.h"
+
 struct Files
 {
 	static std::string Read(const char* url);

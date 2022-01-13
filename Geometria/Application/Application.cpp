@@ -11,6 +11,8 @@
 #include "../Editor/Editor.h"
 #include "../Graphics/Cores/Texture/Texture.h"
 
+#include "Multithreading/Multithreading.h"
+
 Application::State Application::_engineState;
 
 bool Application::IsPlatform(Platform p)
@@ -46,6 +48,8 @@ void Application::Start()
 	TextureManager::ClearRAM();
 
 	RendererCore::EndThreads();
+
+	Multithreading::Start();
 
 	for (int i = 0; i < Hierarchy::allScripts.size(); i++)
 	{

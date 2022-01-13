@@ -29,6 +29,12 @@ struct ImGUIEFont
 	}
 };
 
+struct ImGUIEBoxShadow
+{
+	Color col;
+	Vector2 offset;
+};
+
 class ImGUIElement : public ScriptBehaviour
 {
 public:
@@ -170,6 +176,7 @@ public:
 	static bool _isMouseOnAnyWindow;
 
 	Vector2 size, screenSize = Vector2(-1, -1);
+	Vector2 lastPosition = Vector2(-1, -1), lastSize = Vector2(-1, -1);
 
 	struct
 	{
@@ -190,11 +197,15 @@ public:
 		TopLeft,
 		TopRight,
 		BottomLeft,
-		BottomRight
+		BottomRight,
+		Custom
 	};
 
 	AlignTo Alignment = AlignTo::Nothing;
 	AlignTo ScreenPivot = AlignTo::Nothing;
+
+	Vector2 alignPivot = Vector2(-1, -1);
+	void SetAlignPivot(Vector2 a);
 
 	void OpenWithMouseButton(int input);
 
@@ -252,6 +263,12 @@ public:
 	void RemoveBackgroundGradient();
 
 	void RenderGradients(std::vector<std::pair<Color, float>>& b, ImVec2 topL, ImVec2 botR);
+	void RenderBoxShadow();
+
+	ImGUIEBoxShadow* boxShadow = nullptr;
+
+	ImGUIEBoxShadow* AddBoxShadow(Color shadowCol, Vector2 offset);
+	ImGUIEBoxShadow* RemoveBoxShadow();
 
 	std::vector<std::function<void()>> onClickEvents {};
 

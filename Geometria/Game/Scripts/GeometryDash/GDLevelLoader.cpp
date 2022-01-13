@@ -226,6 +226,14 @@ void GDLevelLoader::AddCustomCollisionSize(int id, Vector3 size)
 	customCollisionSize.push_back(std::make_pair(id, size));
 }
 
+void CanICount()
+{
+	std::cout << "Can i Count? ofc i can!" << '\n';
+	std::cout << "1.." << '\n';
+	std::cout << "2.." << '\n';
+	std::cout << "3!" << '\n';
+}
+
 void GDLevelLoader::LoadVerifier()
 {
 	if (!Files::DirectoryExists("Game/Textures/Blocks"))

@@ -6,7 +6,7 @@
 
 .Main
 {
-	width: 50vw;
+	width: 80vw;
 	height: 80vh;
 	min-width: 500px;
 	min-height: 500px;
@@ -14,21 +14,28 @@
 	padding-x: 0px;
 	border-width: 0px;
 	border-radius: 30px;
-	enable-title: true;
-	enable-resize: true;
+	align: center;
+
+	box-shadow-color: rgb(0, 0, 0, 0.4);
+	box-shadow-x: -20px;
+	box-shadow-y: 20px;
 }
 
 .Center
 {
 	width: 400px;
 	height: 400px;
-	align: center;
 	enable-title: true;
 	enable-resize: true;
+	align: center;
 	padding-x: 0px;
 	border-width: 0px;
 	background-color: linear-gradient(rgb(133, 255, 189) 0%, rgb(255, 251, 125) 100%);
 	border-radius: 30px;
+
+	box-shadow-color: rgb(0, 0, 0, 0.4);
+	box-shadow-x: -20px;
+	box-shadow-y: 20px;
 }
 
 .center-bold
@@ -37,4 +44,5 @@
 	font-size: 50px;
 	align: center;
 	color: rgb(0, 0, 0);
+	wrapping: true;
 }

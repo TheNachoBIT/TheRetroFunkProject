@@ -10,6 +10,7 @@
 #include "../CommonObjects/Empty.h"
 #include "../WebRequest/WebRequest.h"
 #include "Files/GUIML/GUIML.h"
+#include "Multithreading/Multithreading.h"
 #undef CreateWindow
 #ifndef TRUE
 #define TRUE 1

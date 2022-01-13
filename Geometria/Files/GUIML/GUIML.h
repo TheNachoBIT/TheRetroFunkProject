@@ -26,11 +26,14 @@ struct GUIML
 			positionType,
 			windowTitle,
 			windowResize,
-			borderRadius;
+			borderRadius,
+			boxShadowX,
+			boxShadowY;
 
 		Color
 			color = Color(-1, -1, -1, -1),
-			backgroundColor = Color(-1, -1, -1, -1);
+			backgroundColor = Color(-1, -1, -1, -1),
+			boxShadowColor = Color(-1, -1, -1, -1);
 
 		std::vector<std::pair<Color, float>> backgroundGradient;
 	};

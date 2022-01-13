@@ -10,6 +10,7 @@
 #include "../Texture/Texture.h"
 #include "../../Externals/SceneAndDrawCall.h"
 #include "../../../Application/Application.h"
+#include "Multithreading/Multithreading.h"
 
 
 //uint32_t RendererCore::VAO, RendererCore::VBO, RendererCore::EBO, RendererCore::reveal_texture, RendererCore::rbo_depth, RendererCore::accum_texture, RendererCore::oit_fbo, RendererCore::colorNT_texture;
@@ -462,7 +463,8 @@ void RendererCore::Render()
 	if (preRender)
 	{
 		endRenderThreads = false;
-		threads.push_back(std::async(std::launch::async, SortVerticesMultithreading));
+		//threads.push_back(std::async(std::launch::async, SortVerticesMultithreading));
+		Multithreading::RunUpdateThread([]() { RendererCore::SortVertices(); }, 250);
 		preRender = false;
 	}
 

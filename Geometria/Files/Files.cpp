@@ -4,8 +4,6 @@
 #include "nlohmann/json.hpp"
 #include <experimental/filesystem>
 
-#include "Files/ZIP/unzip.h"
-
 #ifdef _WIN32
 #include <Windows.h>
 #endif
